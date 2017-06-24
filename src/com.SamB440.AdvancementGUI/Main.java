@@ -74,12 +74,12 @@ public class Main extends JavaPlugin implements Listener {
 		Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
 			@Override
 			public void run() {
-				p.sendMessage(px + ChatColor.BLUE + "This server is running AdvancementGUI " + ChatColor.YELLOW + getDescription().getVersion() + ChatColor.BLUE + " by SamB440");
 				if(p.isOp() && getConfig().getBoolean("Server.Messages.Join_Messages"))
 				{
 					/*
 					 * We use the variables we defined in our createFiles method to show if everything is OK.
 					 */
+					p.sendMessage(px + ChatColor.BLUE + "This server is running AdvancementGUI " + ChatColor.YELLOW + getDescription().getVersion() + ChatColor.BLUE + " by SamB440");
 					p.sendMessage(px + ChatColor.WHITE + "Latest version? " + version);
 					p.sendMessage(px + ChatColor.WHITE + "Files? " + files);
 					p.sendMessage(px + ChatColor.WHITE + "Config? " + config);
@@ -174,11 +174,19 @@ public class Main extends JavaPlugin implements Listener {
 			p.sendMessage(ChatColor.WHITE + "   Aliases: None.");
 			p.sendMessage(ChatColor.WHITE + "   Description: Create a new advancement.");
 			p.sendMessage(ChatColor.WHITE + "   Permission(s): AdvancementGUI.create");
-			p.sendMessage(ChatColor.YELLOW + "© 2017 IslandEarth.");
+			/*p.sendMessage(ChatColor.GREEN + "/AdvancementGUI counterup (advancementname)");
+			p.sendMessage(ChatColor.WHITE + "   Aliases: None.");
+			p.sendMessage(ChatColor.WHITE + "   Description: Increase a goal advancements count.");
+			p.sendMessage(ChatColor.WHITE + "   Permission(s): AdvancementGUI.counterup");
+			p.sendMessage(ChatColor.GREEN + "/AdvancementGUI counterdown (advancementname)");
+			p.sendMessage(ChatColor.WHITE + "   Aliases: None.");
+			p.sendMessage(ChatColor.WHITE + "   Description: Decrease a goal advancements count.");
+			p.sendMessage(ChatColor.WHITE + "   Permission(s): AdvancementGUI.counterdown");*/
+			p.sendMessage(ChatColor.YELLOW + "© 2017 IslandEarth. Made with" + " ❤ " + "by SamB440.");
 		}
 		if(args.length == 1)
 		{
-			if(args[0].equalsIgnoreCase("create") && p.hasPermission("AdvancementGUI.create") || p.isOp())
+			if(args[0].equalsIgnoreCase("create") && p.hasPermission("AdvancementGUI.create"))
 			{
 				/*
 				 * Here we set the items in the i1 inventory we defined earlier. Then we open it.
@@ -192,17 +200,29 @@ public class Main extends JavaPlugin implements Listener {
 				InventoryManager.i1.setItem(4, normal);
 				ItemStack goal = new ItemStack(Material.PAPER);
 				ItemMeta goalmeta = normal.getItemMeta();
-				goalmeta.setDisplayName(ChatColor.YELLOW + "Goal Advancement");
-				goalmeta.setLore(Arrays.asList(ChatColor.RED + "Coming soon! (v1.0.1)", ChatColor.WHITE + "A 'Goal Advancement'.", "Goal advancements are used to define goals,", "such as travelling a certain amount of blocks."));
+				goalmeta.setDisplayName(ChatColor.GREEN + "Goal Advancement");
+				goalmeta.setLore(Arrays.asList(ChatColor.YELLOW + "Warning: This is W.I.P!", ChatColor.WHITE + "A 'Goal Advancement'.", "Goal advancements are used to define goals,", "such as travelling a certain amount of blocks."));
 				goal.setItemMeta(goalmeta);
 				InventoryManager.i1.setItem(0, goal);
 				ItemStack challenge = new ItemStack(Material.PAPER);
 				ItemMeta challengemeta = normal.getItemMeta();
-				challengemeta.setDisplayName(ChatColor.YELLOW + "Challenge Advancement");
-				challengemeta.setLore(Arrays.asList(ChatColor.RED + "Coming soon! (v1.0.1)", ChatColor.WHITE + "A 'Challenge Advancement'.", "Challenge advancements are.. well... a challenge?", "I didn't know what to put here. Similar to goals I guess."));
+				challengemeta.setDisplayName(ChatColor.GREEN + "Challenge Advancement");
+				challengemeta.setLore(Arrays.asList(ChatColor.YELLOW + "Warning: This is W.I.P!", ChatColor.WHITE + "A 'Challenge Advancement'.", "Challenge advancements are.. well... a challenge?", "I didn't know what to put here. Similar to goals I guess."));
 				challenge.setItemMeta(challengemeta);
 				InventoryManager.i1.setItem(8, challenge);
 				p.openInventory(InventoryManager.i1);
+			}
+			else if(!args[0].equalsIgnoreCase("create") && !p.hasPermission("AdvancementGUI.create"))
+			{
+				p.sendMessage(ChatColor.RED + "You do not have permission for that command: AdvancementGUI.create.");
+			}
+			else if(!args[0].equalsIgnoreCase("create"))
+			{
+				p.sendMessage(ChatColor.RED + "That sub-command could not be found. Type /agui for help.");
+			}
+			if(args[0].equalsIgnoreCase("edit") && p.hasPermission("AdvancementGUI.edit"))
+			{
+				
 			}
 		}
 		return true;

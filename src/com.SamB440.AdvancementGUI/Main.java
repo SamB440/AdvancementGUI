@@ -201,13 +201,13 @@ public class Main extends JavaPlugin implements Listener {
 				ItemStack goal = new ItemStack(Material.PAPER);
 				ItemMeta goalmeta = normal.getItemMeta();
 				goalmeta.setDisplayName(ChatColor.GREEN + "Goal Advancement");
-				goalmeta.setLore(Arrays.asList(ChatColor.YELLOW + "Warning: This is W.I.P!", ChatColor.WHITE + "A 'Goal Advancement'.", "Goal advancements are used to define goals,", "such as travelling a certain amount of blocks."));
+				goalmeta.setLore(Arrays.asList(ChatColor.YELLOW + "Warning: This is W.I.P!", ChatColor.WHITE + "A 'Goal Advancement'.", "Not much here, I don't know...,", "similar to challenges I guess?."));
 				goal.setItemMeta(goalmeta);
 				InventoryManager.i1.setItem(0, goal);
 				ItemStack challenge = new ItemStack(Material.PAPER);
 				ItemMeta challengemeta = normal.getItemMeta();
 				challengemeta.setDisplayName(ChatColor.GREEN + "Challenge Advancement");
-				challengemeta.setLore(Arrays.asList(ChatColor.YELLOW + "Warning: This is W.I.P!", ChatColor.WHITE + "A 'Challenge Advancement'.", "Challenge advancements are.. well... a challenge?", "I didn't know what to put here. Similar to goals I guess."));
+				challengemeta.setLore(Arrays.asList(ChatColor.YELLOW + "Warning: This is W.I.P!", ChatColor.WHITE + "A 'Challenge Advancement'.", "Challenge advancements are used to define challenges,", "such as travelling a certain amount of blocks."));
 				challenge.setItemMeta(challengemeta);
 				InventoryManager.i1.setItem(8, challenge);
 				p.openInventory(InventoryManager.i1);

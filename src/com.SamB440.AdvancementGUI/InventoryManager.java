@@ -6,7 +6,6 @@ import java.util.Arrays;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
@@ -14,7 +13,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -65,12 +63,12 @@ public class InventoryManager implements Listener {
 			ItemStack goal = new ItemStack(Material.PAPER);
 			ItemMeta goalmeta = normal.getItemMeta();
 			goalmeta.setDisplayName(ChatColor.GREEN + "Goal Advancement");
-			goalmeta.setLore(Arrays.asList(ChatColor.YELLOW + "Warning: This is W.I.P!", ChatColor.WHITE + "A 'Goal Advancement'.", "Goal advancements are used to define goals,", "such as travelling a certain amount of blocks."));
+			goalmeta.setLore(Arrays.asList(ChatColor.YELLOW + "Warning: This is W.I.P!", ChatColor.WHITE + "A 'Goal Advancement'.", "Not much here, I don't know...,", "similar to challenges I guess?."));
 			goal.setItemMeta(goalmeta);
 			ItemStack challenge = new ItemStack(Material.PAPER);
 			ItemMeta challengemeta = normal.getItemMeta();
 			challengemeta.setDisplayName(ChatColor.GREEN + "Challenge Advancement");
-			challengemeta.setLore(Arrays.asList(ChatColor.YELLOW + "Warning: This is W.I.P!", ChatColor.WHITE + "A 'Challenge Advancement'.", "Challenge advancements are.. well... a challenge?", "I didn't know what to put here. Similar to goals I guess."));
+			challengemeta.setLore(Arrays.asList(ChatColor.YELLOW + "Warning: This is W.I.P!", ChatColor.WHITE + "A 'Challenge Advancement'.", "Challenge advancements are used to define challenges,", "such as travelling a certain amount of blocks."));
 			challenge.setItemMeta(challengemeta);
 			if(clicked.equals(normal))
 			{
@@ -1558,7 +1556,9 @@ public class InventoryManager implements Listener {
 					{
 						api.save(p.getWorld());
 					}
-					p.sendMessage(ChatColor.GREEN + "Done! You may need to reload or restart the server to see the changes take effect!");
+					p.sendMessage(ChatColor.GREEN + "Reloading advancements...");
+					Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), "minecraft:reload");
+					p.sendMessage(ChatColor.GREEN + "Done!");
 					api.grant(p);
 				}
 			}
@@ -1627,7 +1627,9 @@ public class InventoryManager implements Listener {
 							.save(p.getWorld());
 						}
 					}
-					p.sendMessage(ChatColor.GREEN + "Done! You may need to reload or restart the server to see the changes take effect!");
+					p.sendMessage(ChatColor.GREEN + "Reloading advancements...");
+					Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), "minecraft:reload");
+					p.sendMessage(ChatColor.GREEN + "Done!");
 					api.grant(p);
 				}
 			}
@@ -1661,7 +1663,9 @@ public class InventoryManager implements Listener {
 							.save(p.getWorld());
 						}
 					}
-					p.sendMessage(ChatColor.GREEN + "Done! You may need to reload or restart the server to see the changes take effect!");
+					p.sendMessage(ChatColor.GREEN + "Reloading advancements...");
+					Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), "minecraft:reload");
+					p.sendMessage(ChatColor.GREEN + "Done!");
 				}
 			}
 		}

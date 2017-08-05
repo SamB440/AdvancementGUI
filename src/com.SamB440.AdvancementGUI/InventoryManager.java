@@ -1467,13 +1467,34 @@ public class InventoryManager implements Listener {
 					
 					if(Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 					{
+						
 						api.parent("advancementgui:" + advancementparent)
 						.save(w);
+						advname = "";
+						advdescription = "";
+						advicon = "";
+						advbackground = "";
+						advparent = "";
+						advtrigger = "";
+						advcounter = 0;
+						withparent = false;
+						withcounter = false;
+						allworlds = false;
 					}
 					else if(!Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 					{	
 						api.parent("advancementgui:" + advancementparent)
 						.save(p.getWorld());
+						advname = "";
+						advdescription = "";
+						advicon = "";
+						advbackground = "";
+						advparent = "";
+						advtrigger = "";
+						advcounter = 0;
+						withparent = false;
+						withcounter = false;
+						allworlds = false;
 					}
 				}
 			}
@@ -1484,10 +1505,30 @@ public class InventoryManager implements Listener {
 					if(Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 					{
 						api.save(w);
+						advname = "";
+						advdescription = "";
+						advicon = "";
+						advbackground = "";
+						advparent = "";
+						advtrigger = "";
+						advcounter = 0;
+						withparent = false;
+						withcounter = false;
+						allworlds = false;
 					}
 					else if(!Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 					{
 						api.save(p.getWorld());
+						advname = "";
+						advdescription = "";
+						advicon = "";
+						advbackground = "";
+						advparent = "";
+						advtrigger = "";
+						advcounter = 0;
+						withparent = false;
+						withcounter = false;
+						allworlds = false;
 					}
 					Bukkit.getServer().reloadData();
 					api.grant(p);
@@ -1535,11 +1576,31 @@ public class InventoryManager implements Listener {
 					{
 						api.parent("advancementgui:" + advancementparent)
 						.save(w);
+						advname = "";
+						advdescription = "";
+						advicon = "";
+						advbackground = "";
+						advparent = "";
+						advtrigger = "";
+						advcounter = 0;
+						withparent = false;
+						withcounter = false;
+						allworlds = false;
 					}
 					else if(!Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 					{
 						api.parent("advancementgui:" + advancementparent)
 						.save(p.getWorld());
+						advname = "";
+						advdescription = "";
+						advicon = "";
+						advbackground = "";
+						advparent = "";
+						advtrigger = "";
+						advcounter = 0;
+						withparent = false;
+						withcounter = false;
+						allworlds = false;
 					}
 					Bukkit.getServer().reloadData();
 				}
@@ -1551,10 +1612,30 @@ public class InventoryManager implements Listener {
 					if(Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 					{
 						api.save(w);
+						advname = "";
+						advdescription = "";
+						advicon = "";
+						advbackground = "";
+						advparent = "";
+						advtrigger = "";
+						advcounter = 0;
+						withparent = false;
+						withcounter = false;
+						allworlds = false;
 					}
 					else if(!Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 					{
 						api.save(p.getWorld());
+						advname = "";
+						advdescription = "";
+						advicon = "";
+						advbackground = "";
+						advparent = "";
+						advtrigger = "";
+						advcounter = 0;
+						withparent = false;
+						withcounter = false;
+						allworlds = false;
 					}
 					p.sendMessage(ChatColor.GREEN + "Reloading advancements...");
 					Bukkit.getServer().reloadData();
@@ -1607,11 +1688,31 @@ public class InventoryManager implements Listener {
 						{
 							api.counter(counter)
 							.save(w);
+							advname = "";
+							advdescription = "";
+							advicon = "";
+							advbackground = "";
+							advparent = "";
+							advtrigger = "";
+							advcounter = 0;
+							withparent = false;
+							withcounter = false;
+							allworlds = false;
 						}
 						else if(!Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 						{
 							api.counter(counter)
 							.save(p.getWorld());
+							advname = "";
+							advdescription = "";
+							advicon = "";
+							advbackground = "";
+							advparent = "";
+							advtrigger = "";
+							advcounter = 0;
+							withparent = false;
+							withcounter = false;
+							allworlds = false;
 						}
 					}
 					else if(!wcounter)
@@ -1620,11 +1721,31 @@ public class InventoryManager implements Listener {
 						{
 							api.counter(counter)
 							.save(w);
+							advname = "";
+							advdescription = "";
+							advicon = "";
+							advbackground = "";
+							advparent = "";
+							advtrigger = "";
+							advcounter = 0;
+							withparent = false;
+							withcounter = false;
+							allworlds = false;
 						}
 						else if(!Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 						{
 							api.counter(counter)
 							.save(p.getWorld());
+							advname = "";
+							advdescription = "";
+							advicon = "";
+							advbackground = "";
+							advparent = "";
+							advtrigger = "";
+							advcounter = 0;
+							withparent = false;
+							withcounter = false;
+							allworlds = false;
 						}
 					}
 					p.sendMessage(ChatColor.GREEN + "Reloading advancements...");
@@ -1643,11 +1764,31 @@ public class InventoryManager implements Listener {
 						{
 							api.counter(counter)
 							.save(w);
+							advname = "";
+							advdescription = "";
+							advicon = "";
+							advbackground = "";
+							advparent = "";
+							advtrigger = "";
+							advcounter = 0;
+							withparent = false;
+							withcounter = false;
+							allworlds = false;
 						}
 						else if(!Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 						{
 							api.counter(counter)
 							.save(p.getWorld());
+							advname = "";
+							advdescription = "";
+							advicon = "";
+							advbackground = "";
+							advparent = "";
+							advtrigger = "";
+							advcounter = 0;
+							withparent = false;
+							withcounter = false;
+							allworlds = false;
 						}
 					}
 					else if(!wcounter)
@@ -1656,11 +1797,31 @@ public class InventoryManager implements Listener {
 						{
 							api
 							.save(w);
+							advname = "";
+							advdescription = "";
+							advicon = "";
+							advbackground = "";
+							advparent = "";
+							advtrigger = "";
+							advcounter = 0;
+							withparent = false;
+							withcounter = false;
+							allworlds = false;
 						}
 						else if(!Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 						{
 							api
 							.save(p.getWorld());
+							advname = "";
+							advdescription = "";
+							advicon = "";
+							advbackground = "";
+							advparent = "";
+							advtrigger = "";
+							advcounter = 0;
+							withparent = false;
+							withcounter = false;
+							allworlds = false;
 						}
 					}
 					p.sendMessage(ChatColor.GREEN + "Reloading advancements...");

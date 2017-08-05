@@ -1489,7 +1489,7 @@ public class InventoryManager implements Listener {
 					{
 						api.save(p.getWorld());
 					}
-					p.sendMessage(ChatColor.GREEN + "Done! You may need to reload or restart the server to see the changes take effect!");
+					Bukkit.getServer().reloadData();
 					api.grant(p);
 				}
 			}
@@ -1541,7 +1541,7 @@ public class InventoryManager implements Listener {
 						api.parent("advancementgui:" + advancementparent)
 						.save(p.getWorld());
 					}
-					p.sendMessage(ChatColor.GREEN + "Done! You may need to reload or restart the server to see the changes take effect!");
+					Bukkit.getServer().reloadData();
 				}
 			}
 			else if(!parent)
@@ -1557,7 +1557,7 @@ public class InventoryManager implements Listener {
 						api.save(p.getWorld());
 					}
 					p.sendMessage(ChatColor.GREEN + "Reloading advancements...");
-					Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), "minecraft:reload");
+					Bukkit.getServer().reloadData();
 					p.sendMessage(ChatColor.GREEN + "Done!");
 					api.grant(p);
 				}
@@ -1628,7 +1628,7 @@ public class InventoryManager implements Listener {
 						}
 					}
 					p.sendMessage(ChatColor.GREEN + "Reloading advancements...");
-					Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), "minecraft:reload");
+					Bukkit.getServer().reloadData();
 					p.sendMessage(ChatColor.GREEN + "Done!");
 					api.grant(p);
 				}
@@ -1664,7 +1664,7 @@ public class InventoryManager implements Listener {
 						}
 					}
 					p.sendMessage(ChatColor.GREEN + "Reloading advancements...");
-					Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), "minecraft:reload");
+					Bukkit.getServer().reloadData();
 					p.sendMessage(ChatColor.GREEN + "Done!");
 				}
 			}

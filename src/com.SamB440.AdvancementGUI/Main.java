@@ -182,10 +182,28 @@ public class Main extends JavaPlugin implements Listener {
 			p.sendMessage(ChatColor.WHITE + "   Aliases: None.");
 			p.sendMessage(ChatColor.WHITE + "   Description: Decrease a goal advancements count.");
 			p.sendMessage(ChatColor.WHITE + "   Permission(s): AdvancementGUI.counterdown");*/
+			p.sendMessage(ChatColor.GREEN + "/AdvancementGUI list");
+			p.sendMessage(ChatColor.WHITE + "   Aliases: None.");
+			p.sendMessage(ChatColor.WHITE + "   Description: Lists recently created advancements.");
+			p.sendMessage(ChatColor.WHITE + "   Permission(s): AdvancementGUI.list");
 			p.sendMessage(ChatColor.YELLOW + "© 2017 IslandEarth. Made with" + " ❤ " + "by SamB440.");
 		}
 		if(args.length == 1)
 		{
+			if(args[0].equalsIgnoreCase("edit") && p.hasPermission("AdvancementGUI.edit"))
+			{
+				p.sendMessage(ChatColor.RED + "This is coming soon!");
+			}
+			if(args[0].equalsIgnoreCase("list") && p.hasPermission("AdvancementGUI.list"))
+			{
+				TextComponent help = new TextComponent(ChatColor.YELLOW + "Showing recent list of advancements for AdvancementGUI " + ChatColor.WHITE + "1/1");
+				help.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(ChatColor.WHITE + "Showing page 1/1, click to go to the next page.").create()));
+				p.spigot().sendMessage(help);
+				for(AdvancementAPI list : AdvancementAPI.getAdvancements())
+				{
+					p.sendMessage(ChatColor.GREEN + list.getTitle());
+				}
+			}
 			if(args[0].equalsIgnoreCase("create") && p.hasPermission("AdvancementGUI.create"))
 			{
 				/*
@@ -212,17 +230,13 @@ public class Main extends JavaPlugin implements Listener {
 				InventoryManager.i1.setItem(8, challenge);
 				p.openInventory(InventoryManager.i1);
 			}
-			else if(!args[0].equalsIgnoreCase("create") && !p.hasPermission("AdvancementGUI.create"))
+			else if(args[0].equalsIgnoreCase("create") || args[0].equalsIgnoreCase("list") && !p.hasPermission("AdvancementGUI.create") || !p.hasPermission("AdvancementGUI.list"))
 			{
-				p.sendMessage(ChatColor.RED + "You do not have permission for that command: AdvancementGUI.create.");
+				p.sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Server.Messages.No_Permission")));
 			}
-			else if(!args[0].equalsIgnoreCase("create"))
+			else if(!args[0].equalsIgnoreCase("create") && !args[0].equalsIgnoreCase("list"))
 			{
 				p.sendMessage(ChatColor.RED + "That sub-command could not be found. Type /agui for help.");
-			}
-			if(args[0].equalsIgnoreCase("edit") && p.hasPermission("AdvancementGUI.edit"))
-			{
-				
 			}
 		}
 		return true;

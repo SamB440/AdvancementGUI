@@ -1530,7 +1530,9 @@ public class InventoryManager implements Listener {
 						withcounter = false;
 						allworlds = false;
 					}
+					p.sendMessage(ChatColor.GREEN + "Reloading advancements...");
 					Bukkit.getServer().reloadData();
+					p.sendMessage(ChatColor.GREEN + "Done!");
 					api.grant(p);
 				}
 			}
@@ -1602,7 +1604,10 @@ public class InventoryManager implements Listener {
 						withcounter = false;
 						allworlds = false;
 					}
+					p.sendMessage(ChatColor.GREEN + "Reloading advancements...");
 					Bukkit.getServer().reloadData();
+					p.sendMessage(ChatColor.GREEN + "Done!");
+					api.grant(p);
 				}
 			}
 			else if(!parent)
@@ -1827,6 +1832,7 @@ public class InventoryManager implements Listener {
 					p.sendMessage(ChatColor.GREEN + "Reloading advancements...");
 					Bukkit.getServer().reloadData();
 					p.sendMessage(ChatColor.GREEN + "Done!");
+					api.grant(p);
 				}
 			}
 		}

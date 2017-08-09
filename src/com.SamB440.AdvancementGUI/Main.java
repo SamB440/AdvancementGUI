@@ -186,6 +186,14 @@ public class Main extends JavaPlugin implements Listener {
 			p.sendMessage(ChatColor.WHITE + "   Aliases: None.");
 			p.sendMessage(ChatColor.WHITE + "   Description: Lists recently created advancements.");
 			p.sendMessage(ChatColor.WHITE + "   Permission(s): AdvancementGUI.list");
+			p.sendMessage(ChatColor.GREEN + "/AdvancementGUI counterup (advancement) (player)");
+			p.sendMessage(ChatColor.WHITE + "   Aliases: None.");
+			p.sendMessage(ChatColor.WHITE + "   Description: Increase an advancements count.");
+			p.sendMessage(ChatColor.WHITE + "   Permission(s): AdvancementGUI.count");
+			p.sendMessage(ChatColor.GREEN + "/AdvancementGUI counterdown (advancement) (player)");
+			p.sendMessage(ChatColor.WHITE + "   Aliases: None.");
+			p.sendMessage(ChatColor.WHITE + "   Description: Decrease an advancements count.");
+			p.sendMessage(ChatColor.WHITE + "   Permission(s): AdvancementGUI.count");
 			p.sendMessage(ChatColor.YELLOW + "© 2017 IslandEarth. Made with" + " ❤ " + "by SamB440.");
 		}
 		if(args.length == 1)
@@ -234,7 +242,31 @@ public class Main extends JavaPlugin implements Listener {
 			{
 				p.sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Server.Messages.No_Permission")));
 			}
+			else if(!args[0].equalsIgnoreCase("create") && !args[0].equalsIgnoreCase("list") && args[0].equalsIgnoreCase("counterup") || args[0].equalsIgnoreCase("counterdown"))
+			{
+				p.sendMessage(ChatColor.RED + "Invalid arguments. Please provide an advancement and player.");
+			}
 			else if(!args[0].equalsIgnoreCase("create") && !args[0].equalsIgnoreCase("list"))
+			{
+				p.sendMessage(ChatColor.RED + "That sub-command could not be found. Type /agui for help.");
+			}
+		}
+		else if(args.length == 3)
+		{
+			if(args[0].equalsIgnoreCase("counterup") && p.hasPermission("AdvancementGUI.count"))
+			{
+				InventoryManager.counterUp(args[1], Bukkit.getPlayer(args[2]));
+				p.sendMessage("");
+			}
+			else if(args[0].equalsIgnoreCase("counterdown") && p.hasPermission("AdvancementGUI.count"))
+			{
+				InventoryManager.counterDown(args[1], Bukkit.getPlayer(args[2]));
+			}
+			else if(args[0].equalsIgnoreCase("counterup") || args[0].equalsIgnoreCase("counterdown") && !p.hasPermission("AdvancementGUI.count"))
+			{
+				p.sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Server.Messages.No_Permission")));
+			}
+			else if(!args[0].equalsIgnoreCase("counterup") && !args[0].equalsIgnoreCase("counterdown"))
 			{
 				p.sendMessage(ChatColor.RED + "That sub-command could not be found. Type /agui for help.");
 			}

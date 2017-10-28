@@ -1,13 +1,16 @@
 package com.SamB440.AdvancementGUI;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.advancement.Advancement;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,21 +20,27 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.SamB440.AdvancementGUI.AdvancementAPI.AdvancementAPIBuilder;
+import com.SamB440.AdvancementGUI.Trigger.TriggerType;
+
 
 public class InventoryManager implements Listener {
+	
+	static List<Advancement> advancements = new ArrayList<Advancement>();
 	/*
 	 * Variables that will be defined when creating an advancement
 	 */
-	String advname;
-	String advdescription;
-	String advicon;
-	String advbackground;
-	String advparent;
-	String advtrigger;
-	int advcounter;
-	Boolean withparent = false;
-	Boolean withcounter = false;
-	Boolean allworlds = false;
+	static String advname;
+	static String advtype;
+	static String advdescription;
+	static String advicon;
+	static String advbackground;
+	static String advparent;
+	static String advtrigger;
+	static int advcounter;
+	static Boolean withparent = false;
+	static Boolean withcounter = false;
+	static Boolean allworlds = false;
 	/*
 	 * Here I create the inventories for use later, null is used so that anyone can use the inventory.
 	 */
@@ -43,6 +52,7 @@ public class InventoryManager implements Listener {
 	static Inventory additionalgoal = Bukkit.createInventory(null, 9, "Additional features");
 	static Inventory additionalchallenge = Bukkit.createInventory(null, 18, "Additional features");
 	
+	@SuppressWarnings({ "unused" })
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent ice)
 	{
@@ -75,7 +85,7 @@ public class InventoryManager implements Listener {
 				ItemStack name = new ItemStack(Material.BOOK_AND_QUILL);
 				ItemMeta namemeta = name.getItemMeta();
 				namemeta.setDisplayName(ChatColor.GREEN + "Name Advancement");
-				namemeta.setLore(Arrays.asList(ChatColor.RED + "NOTE: Choosing the name of an advancement that", ChatColor.RED + "already exists, will overwrite the old one!", ChatColor.WHITE + "Open the Anvil GUI to name your advancement."));
+				namemeta.setLore(Arrays.asList(ChatColor.RED + "NOTE: Choosing the name of an advancement that", ChatColor.RED + "already exists will overwrite the old one!", ChatColor.WHITE + "Open the Anvil GUI to name your advancement."));
 				name.setItemMeta(namemeta);
 				inormal.setItem(4, name);
 				ItemStack cancel = new ItemStack(Material.BARRIER);
@@ -121,331 +131,401 @@ public class InventoryManager implements Listener {
 			p.playSound(p.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1.0F, 1.0F);
 			ice.setCancelled(true);
 		}
-		if(inv != null && clicked != null && clicked.getType() != null && clicked.getType() != Material.AIR && inv.equals(ichallenge))
+		if(inv != null && clicked != null && clicked.getType() != null && clicked.getType() != Material.AIR && inv.equals(ichallenge) || inv.equals(igoal) || inv.equals(inormal))
 		{
+			ItemStack icon = new ItemStack(Material.BOOK_AND_QUILL);
+			ItemMeta iconmeta = icon.getItemMeta();
+			iconmeta.setDisplayName(ChatColor.GREEN + "Set an icon");
+			iconmeta.setLore(Arrays.asList(ChatColor.WHITE + "Add an icon to your advancement.", "An icon is an item in Minecraft, such is minecraft:book.", "This will display in the advancements list."));
+			icon.setItemMeta(iconmeta);
+			ItemStack parent = new ItemStack(Material.BOOK_AND_QUILL);
+			ItemMeta parentmeta = parent.getItemMeta();
+			parentmeta.setDisplayName(ChatColor.GREEN + "Set a parent");
+			parentmeta.setLore(Arrays.asList(ChatColor.WHITE + "Add a parent to your advancement.", "A parent is a sub-advancement, ", "it branches off an advancement set already."));
+			parent.setItemMeta(parentmeta);
+			ItemStack background = new ItemStack(Material.BOOK_AND_QUILL);
+			ItemMeta backgroundmeta = background.getItemMeta();
+			backgroundmeta.setDisplayName(ChatColor.GREEN + "Set a background");
+			backgroundmeta.setLore(Arrays.asList(ChatColor.WHITE + "Add a background to your advancement.", "A backround image such as stone.png."));
+			background.setItemMeta(backgroundmeta);
+			ItemStack trigger = new ItemStack(Material.BOOK_AND_QUILL);
+			ItemMeta triggermeta = trigger.getItemMeta();
+			triggermeta.setDisplayName(ChatColor.GREEN + "Set a trigger");
+			triggermeta.setLore(Arrays.asList(ChatColor.WHITE + "Add a trigger to your advancement.", "A trigger is how it is granted.", "Setting it to minecraft:impossible will make it so", "it can only be granted via the grant command."));
+			trigger.setItemMeta(triggermeta);
+			ItemStack description = new ItemStack(Material.BOOK_AND_QUILL);
+			ItemMeta descriptionmeta = description.getItemMeta();
+			descriptionmeta.setDisplayName(ChatColor.GREEN + "Set a description");
+			descriptionmeta.setLore(Arrays.asList(ChatColor.WHITE + "Add a description to your advancement."));
+			description.setItemMeta(descriptionmeta);
+			ItemStack cancel = new ItemStack(Material.BARRIER);
+			ItemMeta cancelmeta = cancel.getItemMeta();
+			cancelmeta.setDisplayName(ChatColor.RED + "Cancel");
+			cancel.setItemMeta(cancelmeta);
+			ItemStack done = new ItemStack(Material.EMERALD);
+			ItemMeta donemeta = done.getItemMeta();
+			donemeta.setDisplayName(ChatColor.GREEN + "Done!");
+			donemeta.setLore(Arrays.asList(ChatColor.RED + "WARNING: You cannot edit the advancement after it's created!"));
+			done.setItemMeta(donemeta);
+			ItemStack rename = new ItemStack(Material.BOOK_AND_QUILL);
+			ItemMeta renamemeta = rename.getItemMeta();
+			renamemeta.setDisplayName(ChatColor.YELLOW + "Rename Advancement");
+			rename.setItemMeta(renamemeta);
 			ItemStack name = new ItemStack(Material.BOOK_AND_QUILL);
 			ItemMeta namemeta = name.getItemMeta();
 			namemeta.setDisplayName(ChatColor.GREEN + "Name Advancement");
 			namemeta.setLore(Arrays.asList(ChatColor.RED + "NOTE: Choosing the name of an advancement that", ChatColor.RED + "already exists will overwrite the old one!", ChatColor.WHITE + "Open the Anvil GUI to name your advancement."));
 			name.setItemMeta(namemeta);
+			ItemStack counter = new ItemStack(Material.BOOK_AND_QUILL);
+			ItemMeta countermeta = counter.getItemMeta();
+			countermeta.setDisplayName(ChatColor.GREEN + "Set a counter");
+			countermeta.setLore(Arrays.asList(ChatColor.RED + "NOTE: You MUST input a number!", ChatColor.WHITE + "Add a counter to your advancement."));
+			counter.setItemMeta(countermeta);
+			if(inv.equals(inormal))
+			{
+				if(clicked.equals(cancel))
+				{
+					p.closeInventory();
+					p.sendMessage(ChatColor.RED + "Cancelled Advancement creation.");
+				}
+				else if(clicked.equals(name))
+				{
+					final AnvilGUI gui = new AnvilGUI(Main.instance, p, "IslandEarth", (player, reply) -> {
+						if(reply != null)
+						{
+							advname = reply;
+							p.sendMessage(reply); //event.getName() == string in anvil
+							additional.setItem(4, icon);
+							additional.setItem(5, parent);
+							additional.setItem(6, background);
+							additional.setItem(7, trigger);
+							additional.setItem(8, description);
+							additional.setItem(0, cancel);
+							additional.setItem(2, done);
+							additional.setItem(1, rename);
+							Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+								@Override
+								public void run() {
+									p.openInventory(additional);
+									advtype = "NORMAL";
+								}
+							}, 5L);
+							p.playSound(p.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1.0F, 1.0F);
+							ice.setCancelled(true);
+							return null;
+						}
+						return "You must enter a string.";
+					});
+				}
+			}
+			else if(inv.equals(ichallenge))
+			{
+				if(clicked.equals(cancel))
+				{
+					p.closeInventory();
+					p.sendMessage(ChatColor.RED + "Cancelled Advancement creation.");
+				}
+				else if(clicked.equals(name))
+				{
+					AnvilGUI gui = new AnvilGUI(Main.instance, p, "IslandEarth", (player, reply) -> {
+						if(reply != null)
+						{
+							advname = reply;
+							p.sendMessage(reply);
+							additionalchallenge.setItem(4, icon);
+							additionalchallenge.setItem(5, parent);
+							additionalchallenge.setItem(6, background);
+							additionalchallenge.setItem(7, trigger);
+							additionalchallenge.setItem(8, description);
+							additionalchallenge.setItem(13, counter);
+							additionalchallenge.setItem(0, cancel);
+							additionalchallenge.setItem(2, done);
+							additionalchallenge.setItem(1, rename);
+							Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() 
+							{
+								@Override
+								public void run() {
+									p.openInventory(additionalchallenge);
+									advtype = "CHALLENGE";
+								}
+							}, 5L);
+							p.playSound(p.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1.0F, 1.0F);
+							ice.setCancelled(true);
+							return null;
+						}
+					    return "You must enter a string.";
+					});
+				}
+			}
+			else if(inv.equals(igoal))
+			{
+				if(clicked.equals(cancel))
+				{
+					p.closeInventory();
+					p.sendMessage(ChatColor.RED + "Cancelled Advancement creation.");
+				}
+				else if(clicked.equals(name))
+				{
+					AnvilGUI gui = new AnvilGUI(Main.instance, p, "IslandEarth", (player, reply) -> {
+						if(reply != null)
+						{
+							advname = reply;
+							p.sendMessage(reply);
+							additionalgoal.setItem(4, icon);
+							additionalgoal.setItem(5, parent);
+							additionalgoal.setItem(6, background);
+							additionalgoal.setItem(7, trigger);
+							additionalgoal.setItem(8, description);
+							additionalgoal.setItem(0, cancel);
+							additionalgoal.setItem(2, done);
+							additionalgoal.setItem(1, rename);
+							Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() 
+							{
+								@Override
+								public void run() {
+									p.openInventory(additionalgoal);
+									advtype = "GOAL";
+								}
+							}, 5L);
+							p.playSound(p.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1.0F, 1.0F);
+							ice.setCancelled(true);
+							return null;
+						}
+					    return "You must enter a string.";
+					});
+				}
+			}
+		}
+		else if(inv != null && clicked != null && clicked.getType() != null && clicked.getType() != Material.AIR && inv.equals(additionalchallenge) || inv.equals(additional) || inv.equals(additionalgoal))
+		{
+			ItemStack icon = new ItemStack(Material.BOOK_AND_QUILL);
+			ItemMeta iconmeta = icon.getItemMeta();
+			iconmeta.setDisplayName(ChatColor.GREEN + "Set an icon");
+			iconmeta.setLore(Arrays.asList(ChatColor.WHITE + "Add an icon to your advancement.", "An icon is an item in Minecraft, such is minecraft:book.", "This will display in the advancements list."));
+			icon.setItemMeta(iconmeta);
+			ItemStack parent = new ItemStack(Material.BOOK_AND_QUILL);
+			ItemMeta parentmeta = parent.getItemMeta();
+			parentmeta.setDisplayName(ChatColor.GREEN + "Set a parent");
+			parentmeta.setLore(Arrays.asList(ChatColor.WHITE + "Add a parent to your advancement.", "A parent is a sub-advancement, ", "it branches off an advancement set already."));
+			parent.setItemMeta(parentmeta);
+			ItemStack background = new ItemStack(Material.BOOK_AND_QUILL);
+			ItemMeta backgroundmeta = background.getItemMeta();
+			backgroundmeta.setDisplayName(ChatColor.GREEN + "Set a background");
+			backgroundmeta.setLore(Arrays.asList(ChatColor.WHITE + "Add a background to your advancement.", "A backround image such as stone.png."));
+			background.setItemMeta(backgroundmeta);
+			ItemStack trigger = new ItemStack(Material.BOOK_AND_QUILL);
+			ItemMeta triggermeta = trigger.getItemMeta();
+			triggermeta.setDisplayName(ChatColor.GREEN + "Set a trigger");
+			triggermeta.setLore(Arrays.asList(ChatColor.WHITE + "Add a trigger to your advancement.", "A trigger is how it is granted.", "Setting it to minecraft:impossible will make it so", "it can only be granted via the grant command."));
+			trigger.setItemMeta(triggermeta);
+			ItemStack description = new ItemStack(Material.BOOK_AND_QUILL);
+			ItemMeta descriptionmeta = description.getItemMeta();
+			descriptionmeta.setDisplayName(ChatColor.GREEN + "Set a description");
+			descriptionmeta.setLore(Arrays.asList(ChatColor.WHITE + "Add a description to your advancement."));
+			description.setItemMeta(descriptionmeta);
 			ItemStack cancel = new ItemStack(Material.BARRIER);
 			ItemMeta cancelmeta = cancel.getItemMeta();
 			cancelmeta.setDisplayName(ChatColor.RED + "Cancel");
 			cancel.setItemMeta(cancelmeta);
-			if(clicked.equals(cancel))
-			{
-				p.closeInventory();
-				p.sendMessage(ChatColor.RED + "Cancelled Advancement creation.");
-			}
-			else if(clicked.equals(name))
-			{
-				AnvilGUI gui = new AnvilGUI(p.getPlayer(), new AnvilGUI.AnvilClickEventHandler() {
-	                @Override
-	                public void onAnvilClick(AnvilGUI.AnvilClickEvent event) {
-	                    if (event.getSlot() == AnvilGUI.AnvilSlot.OUTPUT) {
-	                        event.setWillClose(true);
-	                        event.setWillDestroy(true);
-	                        advname = event.getName();
-	                        p.sendMessage(event.getName()); //event.getName() == string in anvil
-	                        ItemStack icon = new ItemStack(Material.BOOK_AND_QUILL);
-	            			ItemMeta iconmeta = icon.getItemMeta();
-	            			iconmeta.setDisplayName(ChatColor.GREEN + "Set an icon");
-	            			iconmeta.setLore(Arrays.asList(ChatColor.WHITE + "Add an icon to your advancement.", "An icon is an item in Minecraft, such is minecraft:book.", "This will display in the advancements list."));
-	            			icon.setItemMeta(iconmeta);
-	            			additionalchallenge.setItem(4, icon);
-	            			ItemStack parent = new ItemStack(Material.BOOK_AND_QUILL);
-	            			ItemMeta parentmeta = parent.getItemMeta();
-	            			parentmeta.setDisplayName(ChatColor.GREEN + "Set a parent");
-	            			parentmeta.setLore(Arrays.asList(ChatColor.WHITE + "Add a parent to your advancement.", "A parent is a sub-advancement, ", "it branches off an advancement set already."));
-	            			parent.setItemMeta(parentmeta);
-	            			additionalchallenge.setItem(5, parent);
-	            			ItemStack background = new ItemStack(Material.BOOK_AND_QUILL);
-	            			ItemMeta backgroundmeta = background.getItemMeta();
-	            			backgroundmeta.setDisplayName(ChatColor.GREEN + "Set a background");
-	            			backgroundmeta.setLore(Arrays.asList(ChatColor.WHITE + "Add a background to your advancement.", "A backround image such as stone.png."));
-	            			background.setItemMeta(backgroundmeta);
-	            			additionalchallenge.setItem(6, background);
-	            			ItemStack trigger = new ItemStack(Material.BOOK_AND_QUILL);
-	            			ItemMeta triggermeta = trigger.getItemMeta();
-	            			triggermeta.setDisplayName(ChatColor.GREEN + "Set a trigger");
-	            			triggermeta.setLore(Arrays.asList(ChatColor.WHITE + "Add a trigger to your advancement.", "A trigger is how it is granted.", "Setting it to minecraft:impossible will make it so", "it can only be granted via the grant command."));
-	            			trigger.setItemMeta(triggermeta);
-	            			additionalchallenge.setItem(7, trigger);
-	            			ItemStack description = new ItemStack(Material.BOOK_AND_QUILL);
-	            			ItemMeta descriptionmeta = description.getItemMeta();
-	            			descriptionmeta.setDisplayName(ChatColor.GREEN + "Set a description");
-	            			descriptionmeta.setLore(Arrays.asList(ChatColor.WHITE + "Add a description to your advancement."));
-	            			description.setItemMeta(descriptionmeta);
-	            			additionalchallenge.setItem(8, description);
-	            			ItemStack counter = new ItemStack(Material.BOOK_AND_QUILL);
-	            			ItemMeta countermeta = counter.getItemMeta();
-	            			countermeta.setDisplayName(ChatColor.GREEN + "Set a counter");
-	            			countermeta.setLore(Arrays.asList(ChatColor.RED + "NOTE: You MUST input a number!", ChatColor.WHITE + "Add a counter to your advancement."));
-	            			counter.setItemMeta(countermeta);
-	            			additionalchallenge.setItem(13, counter);
-	            			ItemStack cancel = new ItemStack(Material.BARRIER);
-	            			ItemMeta cancelmeta = cancel.getItemMeta();
-	            			cancelmeta.setDisplayName(ChatColor.RED + "Cancel");
-	            			cancel.setItemMeta(cancelmeta);
-	            			additionalchallenge.setItem(0, cancel);
-	            			ItemStack done = new ItemStack(Material.EMERALD);
-	            			ItemMeta donemeta = done.getItemMeta();
-	            			donemeta.setDisplayName(ChatColor.GREEN + "Done!");
-	            			donemeta.setLore(Arrays.asList(ChatColor.RED + "WARNING: You cannot edit the advancement after it's created!"));
-	            			done.setItemMeta(donemeta);
-	            			additionalchallenge.setItem(2, done);
-	            			ItemStack rename = new ItemStack(Material.BOOK_AND_QUILL);
-	            			ItemMeta renamemeta = rename.getItemMeta();
-	            			renamemeta.setDisplayName(ChatColor.YELLOW + "Rename Advancement");
-	            			rename.setItemMeta(renamemeta);
-	            			additionalchallenge.setItem(1, rename);
-	            	        Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
-	            				@Override
-	            				public void run() {
-	            					p.openInventory(additionalchallenge);
-	            				}
-	            	        }, 5L);
-	                    } else {
-	                        event.setWillClose(false);
-	                        event.setWillDestroy(false);
-	                    }
-	                }
-	            });
-				ItemStack item = new ItemStack(Material.PAPER);
-				ItemMeta itemmeta = item.getItemMeta();
-				itemmeta.setDisplayName("IslandEarth");
-				item.setItemMeta(itemmeta);
-	            gui.setSlot(AnvilGUI.AnvilSlot.INPUT_LEFT, item);
-
-	            try {
-	                gui.open();
-	            } catch (IllegalAccessException e) {
-	                e.printStackTrace();
-	            } catch (InvocationTargetException e) {
-	                e.printStackTrace();
-	            } catch (InstantiationException e) {
-	                e.printStackTrace();
-	            }
-			}
-			p.playSound(p.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1.0F, 1.0F);
-			ice.setCancelled(true);
-		}
-		if(inv != null && clicked != null && clicked.getType() != null && clicked.getType() != Material.AIR && inv.equals(igoal))
-		{
+			ItemStack done = new ItemStack(Material.EMERALD);
+			ItemMeta donemeta = done.getItemMeta();
+			donemeta.setDisplayName(ChatColor.GREEN + "Done!");
+			donemeta.setLore(Arrays.asList(ChatColor.RED + "WARNING: You cannot edit the advancement after it's created!"));
+			done.setItemMeta(donemeta);
+			ItemStack rename = new ItemStack(Material.BOOK_AND_QUILL);
+			ItemMeta renamemeta = rename.getItemMeta();
+			renamemeta.setDisplayName(ChatColor.YELLOW + "Rename Advancement");
+			rename.setItemMeta(renamemeta);
 			ItemStack name = new ItemStack(Material.BOOK_AND_QUILL);
 			ItemMeta namemeta = name.getItemMeta();
 			namemeta.setDisplayName(ChatColor.GREEN + "Name Advancement");
 			namemeta.setLore(Arrays.asList(ChatColor.RED + "NOTE: Choosing the name of an advancement that", ChatColor.RED + "already exists will overwrite the old one!", ChatColor.WHITE + "Open the Anvil GUI to name your advancement."));
 			name.setItemMeta(namemeta);
-			ItemStack cancel = new ItemStack(Material.BARRIER);
-			ItemMeta cancelmeta = cancel.getItemMeta();
-			cancelmeta.setDisplayName(ChatColor.RED + "Cancel");
-			cancel.setItemMeta(cancelmeta);
+			ItemStack counter = new ItemStack(Material.BOOK_AND_QUILL);
+			ItemMeta countermeta = counter.getItemMeta();
+			countermeta.setDisplayName(ChatColor.GREEN + "Set a counter");
+			countermeta.setLore(Arrays.asList(ChatColor.RED + "NOTE: You MUST input a number!", ChatColor.WHITE + "Add a counter to your advancement."));
+			counter.setItemMeta(countermeta);
+			if(clicked.equals(rename))
+			{
+				Inventory i = ice.getInventory();
+				p.closeInventory();
+				AnvilGUI gui = new AnvilGUI(Main.instance, p, "IslandEarth", (player, reply) -> {
+					if(reply != null)
+					{
+						advname = reply;
+						p.sendMessage(reply);
+						Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+							@Override
+							public void run() {
+								p.openInventory(i);
+							}
+						}, 5L);
+						return null;
+	                }
+					return "You must enter a string.";
+	            });
+			}
 			if(clicked.equals(cancel))
 			{
 				p.closeInventory();
+				p.openInventory(i1);
+				p.sendMessage(ChatColor.RED + "Resetting data...");
+				advname = null;
+				advdescription = null;
+				advicon = null;
+				advbackground = null;
+				advparent = null;
+				advtrigger = null;
+				advcounter = 0;
+				withparent = false;
+				withcounter = false;
+				allworlds = false;
 				p.sendMessage(ChatColor.RED + "Cancelled Advancement creation.");
 			}
-			else if(clicked.equals(name))
+			if(clicked.equals(icon))
 			{
-				AnvilGUI gui = new AnvilGUI(p.getPlayer(), new AnvilGUI.AnvilClickEventHandler() {
-	                @Override
-	                public void onAnvilClick(AnvilGUI.AnvilClickEvent event) {
-	                    if (event.getSlot() == AnvilGUI.AnvilSlot.OUTPUT) {
-	                        event.setWillClose(true);
-	                        event.setWillDestroy(true);
-	                        advname = event.getName();
-	                        p.sendMessage(event.getName()); //event.getName() == string in anvil
-	                        ItemStack icon = new ItemStack(Material.BOOK_AND_QUILL);
-	            			ItemMeta iconmeta = icon.getItemMeta();
-	            			iconmeta.setDisplayName(ChatColor.GREEN + "Set an icon");
-	            			iconmeta.setLore(Arrays.asList(ChatColor.WHITE + "Add an icon to your advancement.", "An icon is an item in Minecraft, such is minecraft:book.", "This will display in the advancements list."));
-	            			icon.setItemMeta(iconmeta);
-	            			additionalgoal.setItem(4, icon);
-	            			ItemStack parent = new ItemStack(Material.BOOK_AND_QUILL);
-	            			ItemMeta parentmeta = parent.getItemMeta();
-	            			parentmeta.setDisplayName(ChatColor.GREEN + "Set a parent");
-	            			parentmeta.setLore(Arrays.asList(ChatColor.WHITE + "Add a parent to your advancement.", "A parent is a sub-advancement, ", "it branches off an advancement set already."));
-	            			parent.setItemMeta(parentmeta);
-	            			additionalgoal.setItem(5, parent);
-	            			ItemStack background = new ItemStack(Material.BOOK_AND_QUILL);
-	            			ItemMeta backgroundmeta = background.getItemMeta();
-	            			backgroundmeta.setDisplayName(ChatColor.GREEN + "Set a background");
-	            			backgroundmeta.setLore(Arrays.asList(ChatColor.WHITE + "Add a background to your advancement.", "A backround image such as stone.png."));
-	            			background.setItemMeta(backgroundmeta);
-	            			additionalgoal.setItem(6, background);
-	            			ItemStack trigger = new ItemStack(Material.BOOK_AND_QUILL);
-	            			ItemMeta triggermeta = trigger.getItemMeta();
-	            			triggermeta.setDisplayName(ChatColor.GREEN + "Set a trigger");
-	            			triggermeta.setLore(Arrays.asList(ChatColor.WHITE + "Add a trigger to your advancement.", "A trigger is how it is granted.", "Setting it to minecraft:impossible will make it so", "it can only be granted via the grant command."));
-	            			trigger.setItemMeta(triggermeta);
-	            			additionalgoal.setItem(7, trigger);
-	            			ItemStack description = new ItemStack(Material.BOOK_AND_QUILL);
-	            			ItemMeta descriptionmeta = description.getItemMeta();
-	            			descriptionmeta.setDisplayName(ChatColor.GREEN + "Set a description");
-	            			descriptionmeta.setLore(Arrays.asList(ChatColor.WHITE + "Add a description to your advancement."));
-	            			description.setItemMeta(descriptionmeta);
-	            			additionalgoal.setItem(8, description);
-	            			/*ItemStack counter = new ItemStack(Material.BOOK_AND_QUILL);
-	            			ItemMeta countermeta = counter.getItemMeta();
-	            			countermeta.setDisplayName(ChatColor.GREEN + "Set a counter");
-	            			countermeta.setLore(Arrays.asList(ChatColor.RED + "NOTE: You MUST input a number!", ChatColor.WHITE + "Add a counter to your advancement."));
-	            			counter.setItemMeta(countermeta);
-	            			additionalgoal.setItem(12, counter);*/
-	            			ItemStack cancel = new ItemStack(Material.BARRIER);
-	            			ItemMeta cancelmeta = cancel.getItemMeta();
-	            			cancelmeta.setDisplayName(ChatColor.RED + "Cancel");
-	            			cancel.setItemMeta(cancelmeta);
-	            			additionalgoal.setItem(0, cancel);
-	            			ItemStack done = new ItemStack(Material.EMERALD);
-	            			ItemMeta donemeta = done.getItemMeta();
-	            			donemeta.setDisplayName(ChatColor.GREEN + "Done!");
-	            			donemeta.setLore(Arrays.asList(ChatColor.RED + "WARNING: You cannot edit the advancement after it's created!"));
-	            			done.setItemMeta(donemeta);
-	            			additionalgoal.setItem(2, done);
-	            			ItemStack rename = new ItemStack(Material.BOOK_AND_QUILL);
-	            			ItemMeta renamemeta = rename.getItemMeta();
-	            			renamemeta.setDisplayName(ChatColor.YELLOW + "Rename Advancement");
-	            			rename.setItemMeta(renamemeta);
-	            			additionalgoal.setItem(1, rename);
-	            	        Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
-	            				@Override
-	            				public void run() {
-	            					p.openInventory(additionalgoal);
-	            				}
-	            	        }, 5L);
-	                    } else {
-	                        event.setWillClose(false);
-	                        event.setWillDestroy(false);
-	                    }
+				AnvilGUI gui = new AnvilGUI(Main.instance, p, "Ex: minecraft:book", (player, reply) -> {
+					if(reply != null)
+					{
+						Inventory i = ice.getInventory();
+						advicon = reply;
+						p.sendMessage(reply);
+						Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+							@Override
+							public void run() {
+								p.openInventory(i);
+							}
+						}, 5L);
+						return null;
 	                }
+					return "You must enter a string.";
 	            });
-				ItemStack item = new ItemStack(Material.PAPER);
-				ItemMeta itemmeta = item.getItemMeta();
-				itemmeta.setDisplayName("IslandEarth");
-				item.setItemMeta(itemmeta);
-	            gui.setSlot(AnvilGUI.AnvilSlot.INPUT_LEFT, item);
-
-	            try {
-	                gui.open();
-	            } catch (IllegalAccessException e) {
-	                e.printStackTrace();
-	            } catch (InvocationTargetException e) {
-	                e.printStackTrace();
-	            } catch (InstantiationException e) {
-	                e.printStackTrace();
-	            }
 			}
-			p.playSound(p.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1.0F, 1.0F);
-			ice.setCancelled(true);
-		}
-		if(inv != null && clicked != null && clicked.getType() != null && clicked.getType() != Material.AIR && inv.equals(inormal))
-		{
-			ItemStack name = new ItemStack(Material.BOOK_AND_QUILL);
-			ItemMeta namemeta = name.getItemMeta();
-			namemeta.setDisplayName(ChatColor.GREEN + "Name Advancement");
-			namemeta.setLore(Arrays.asList(ChatColor.RED + "NOTE: Choosing the name of an advancement that", ChatColor.RED + "already exists, will overwrite the old one!", ChatColor.WHITE + "Open the Anvil GUI to name your advancement."));
-			name.setItemMeta(namemeta);
-			ItemStack cancel = new ItemStack(Material.BARRIER);
-			ItemMeta cancelmeta = cancel.getItemMeta();
-			cancelmeta.setDisplayName(ChatColor.RED + "Cancel");
-			cancel.setItemMeta(cancelmeta);
-			if(clicked.equals(cancel))
+			if(clicked.equals(parent))
+			{
+				AnvilGUI gui = new AnvilGUI(Main.instance, p, "advancementname", (player, reply) -> {
+					if(reply != null)
+					{
+						Inventory i = ice.getInventory();
+						advparent = reply;
+						withparent = true;
+						p.sendMessage(reply); //event.getName() == string in anvil
+						Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+							@Override
+							public void run() {
+								p.openInventory(i);
+							}
+						}, 5L);
+						return null;
+					}
+					return "You must enter a string.";
+				});
+			}
+			if(clicked.equals(background))
+			{
+				AnvilGUI gui = new AnvilGUI(Main.instance, p, "Ex: stone.png", (player, reply) -> {
+					if(reply != null)
+					{
+						Inventory i = ice.getInventory();
+						advbackground = reply;
+						p.sendMessage(reply); //event.getName() == string in anvil
+						Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+							@Override
+							public void run() {
+								p.openInventory(i);
+							}
+						}, 5L);
+						return null;
+					}
+					return "You must enter a string.";
+	            });
+			}
+			if(clicked.equals(trigger))
+			{
+				AnvilGUI gui = new AnvilGUI(Main.instance, p, "Ex: IMPOSSIBLE", (player, reply) -> {
+					if(reply != null)
+					{
+						Inventory i = ice.getInventory();
+						advtrigger = reply;
+						p.sendMessage(reply); //event.getName() == string in anvil
+						Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+							@Override
+							public void run() {
+								System.out.println(String.valueOf(advtrigger));
+								p.openInventory(i);
+							}
+						}, 5L);
+						return null;
+	                }
+					return "You must enter a string.";
+	            });
+			}
+			if(clicked.equals(counter))
+			{
+				AnvilGUI gui = new AnvilGUI(Main.instance, p, "Ex: 10", (player, reply) -> {
+					if(reply != null)
+					{
+						Inventory i = ice.getInventory();
+						advcounter = Integer.valueOf(reply);
+						p.sendMessage("" + advcounter);
+						withcounter = true;
+						p.sendMessage("" + withcounter);
+						p.sendMessage(reply); //event.getName() == string in anvil
+						Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+							@Override
+							public void run() {
+								p.openInventory(i);
+							}
+						}, 5L);
+						return null;
+					}
+					return "You must enter a string.";
+	           });
+			}
+			if(clicked.equals(done))
 			{
 				p.closeInventory();
-				p.sendMessage(ChatColor.RED + "Cancelled Advancement creation.");
+				p.sendMessage(ChatColor.GREEN + "Saving...");
+				switch (advtype)
+				{
+					case "NORMAL":
+						createAdvancement(p, advname, advdescription, advicon, advtrigger, advbackground, advparent, withparent);
+						advtype = null;
+						break;
+					case "CHALLENGE":
+						createChallengeAdvancement(p, advname, advdescription, advicon, advtrigger, advbackground, advparent, withparent, advcounter, withcounter);
+						advtype = null;
+						break;
+					case "GOAL":
+						createGoalAdvancement(p, advname, advdescription, advicon, advtrigger, advbackground, advparent, withparent);
+						advtype = null;
+						break;
+				}	
 			}
-			else if(clicked.equals(name))
+			if(clicked.equals(description))
 			{
-				/*
-				 * This is where AnvilGUI.class comes into play.
-				 */
-				AnvilGUI gui = new AnvilGUI(p.getPlayer(), new AnvilGUI.AnvilClickEventHandler() {
-	                @Override
-	                public void onAnvilClick(AnvilGUI.AnvilClickEvent event) {
-	                    if (event.getSlot() == AnvilGUI.AnvilSlot.OUTPUT) {
-	                        event.setWillClose(true);
-	                        event.setWillDestroy(true);
-	                        advname = event.getName();
-	                        p.sendMessage(event.getName()); //event.getName() == string in anvil
-	                        ItemStack icon = new ItemStack(Material.BOOK_AND_QUILL);
-	            			ItemMeta iconmeta = icon.getItemMeta();
-	            			iconmeta.setDisplayName(ChatColor.GREEN + "Set an icon");
-	            			iconmeta.setLore(Arrays.asList(ChatColor.WHITE + "Add an icon to your advancement.", "An icon is an item in Minecraft, such is minecraft:book.", "This will display in the advancements list."));
-	            			icon.setItemMeta(iconmeta);
-	            			additional.setItem(4, icon);
-	            			ItemStack parent = new ItemStack(Material.BOOK_AND_QUILL);
-	            			ItemMeta parentmeta = parent.getItemMeta();
-	            			parentmeta.setDisplayName(ChatColor.GREEN + "Set a parent");
-	            			parentmeta.setLore(Arrays.asList(ChatColor.WHITE + "Add a parent to your advancement.", "A parent is a sub-advancement, ", "it branches off an advancement set already."));
-	            			parent.setItemMeta(parentmeta);
-	            			additional.setItem(5, parent);
-	            			ItemStack background = new ItemStack(Material.BOOK_AND_QUILL);
-	            			ItemMeta backgroundmeta = background.getItemMeta();
-	            			backgroundmeta.setDisplayName(ChatColor.GREEN + "Set a background");
-	            			backgroundmeta.setLore(Arrays.asList(ChatColor.WHITE + "Add a background to your advancement.", "A backround image such as stone.png."));
-	            			background.setItemMeta(backgroundmeta);
-	            			additional.setItem(6, background);
-	            			ItemStack trigger = new ItemStack(Material.BOOK_AND_QUILL);
-	            			ItemMeta triggermeta = trigger.getItemMeta();
-	            			triggermeta.setDisplayName(ChatColor.GREEN + "Set a trigger");
-	            			triggermeta.setLore(Arrays.asList(ChatColor.WHITE + "Add a trigger to your advancement.", "A trigger is how it is granted.", "Setting it to minecraft:impossible will make it so", "it can only be granted via the grant command."));
-	            			trigger.setItemMeta(triggermeta);
-	            			additional.setItem(7, trigger);
-	            			ItemStack description = new ItemStack(Material.BOOK_AND_QUILL);
-	            			ItemMeta descriptionmeta = description.getItemMeta();
-	            			descriptionmeta.setDisplayName(ChatColor.GREEN + "Set a description");
-	            			descriptionmeta.setLore(Arrays.asList(ChatColor.WHITE + "Add a description to your advancement."));
-	            			description.setItemMeta(descriptionmeta);
-	            			additional.setItem(8, description);
-	            			ItemStack cancel = new ItemStack(Material.BARRIER);
-	            			ItemMeta cancelmeta = cancel.getItemMeta();
-	            			cancelmeta.setDisplayName(ChatColor.RED + "Cancel");
-	            			cancel.setItemMeta(cancelmeta);
-	            			additional.setItem(0, cancel);
-	            			ItemStack done = new ItemStack(Material.EMERALD);
-	            			ItemMeta donemeta = done.getItemMeta();
-	            			donemeta.setDisplayName(ChatColor.GREEN + "Done!");
-	            			donemeta.setLore(Arrays.asList(ChatColor.RED + "WARNING: You cannot edit the advancement after it's created!"));
-	            			done.setItemMeta(donemeta);
-	            			additional.setItem(2, done);
-	            			ItemStack rename = new ItemStack(Material.BOOK_AND_QUILL);
-	            			ItemMeta renamemeta = rename.getItemMeta();
-	            			renamemeta.setDisplayName(ChatColor.YELLOW + "Rename Advancement");
-	            			rename.setItemMeta(renamemeta);
-	            			additional.setItem(1, rename);
-	            	        Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
-	            				@Override
-	            				public void run() {
-	            					p.openInventory(additional);
-	            				}
-	            	        }, 5L);
-	                    } else {
-	                        event.setWillClose(false);
-	                        event.setWillDestroy(false);
-	                    }
-	                }
+				AnvilGUI gui = new AnvilGUI(Main.instance, p, "Enter description", (player, reply) -> {
+					if(reply != null)
+					{
+						Inventory i = ice.getInventory();
+	                        advdescription = reply;
+	                        p.sendMessage(reply); //event.getName() == string in anvil
+	                        Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+	                			@Override
+	                			public void run() {
+	                				p.openInventory(i);
+	                			}
+	                        }, 5L);
+	                        return null;
+						}
+					return "You must enter a string.";
 	            });
-				ItemStack item = new ItemStack(Material.PAPER);
-				ItemMeta itemmeta = item.getItemMeta();
-				itemmeta.setDisplayName("IslandEarth");
-				item.setItemMeta(itemmeta);
-	            gui.setSlot(AnvilGUI.AnvilSlot.INPUT_LEFT, item);
-
-	            try {
-	                gui.open();
-	            } catch (IllegalAccessException e) {
-	                e.printStackTrace();
-	            } catch (InvocationTargetException e) {
-	                e.printStackTrace();
-	            } catch (InstantiationException e) {
-	                e.printStackTrace();
-	            }
 			}
 			p.playSound(p.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1.0F, 1.0F);
 			ice.setCancelled(true);
-		}
-		if(inv != null && clicked != null && clicked.getType() != null && clicked.getType() != Material.AIR && inv.equals(additionalchallenge))
+		}	
+		/*if(inv != null && clicked != null && clicked.getType() != null && clicked.getType() != Material.AIR && inv.equals(additionalchallenge))
 		{
 			ItemStack icon = new ItemStack(Material.BOOK_AND_QUILL);
 			ItemMeta iconmeta = icon.getItemMeta();
@@ -493,41 +573,22 @@ public class InventoryManager implements Listener {
 			if(clicked.equals(rename))
 			{
 				p.closeInventory();
-				AnvilGUI gui = new AnvilGUI(p.getPlayer(), new AnvilGUI.AnvilClickEventHandler() {
-	                @Override
-	                public void onAnvilClick(AnvilGUI.AnvilClickEvent event) {
-	                    if (event.getSlot() == AnvilGUI.AnvilSlot.OUTPUT) {
-	                        event.setWillClose(true);
-	                        event.setWillDestroy(true);
-	                        advname = event.getName();
-	                        p.sendMessage(event.getName()); //event.getName() == string in anvil
-	            	        Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
-	            				@Override
-	            				public void run() {
-	            					p.openInventory(additionalchallenge);
-	            				}
-	            	        }, 5L);
-	                    } else {
-	                        event.setWillClose(false);
-	                        event.setWillDestroy(false);
-	                    }
+				AnvilGUI gui = new AnvilGUI(Main.instance, p, "IslandEarth", (player, reply) -> {
+					if(reply != null)
+					{
+						advname = reply;
+						p.sendMessage(reply);
+						gui.closeInventory();
+						Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+							@Override
+							public void run() {
+								p.openInventory(additionalchallenge);
+							}
+						}, 5L);
+						return null;
 	                }
+					return "You must enter a string.";
 	            });
-				ItemStack item = new ItemStack(Material.PAPER);
-				ItemMeta itemmeta = item.getItemMeta();
-				itemmeta.setDisplayName("Example: IslandEarth");
-				item.setItemMeta(itemmeta);
-	            gui.setSlot(AnvilGUI.AnvilSlot.INPUT_LEFT, item);
-
-	            try {
-	                gui.open();
-	            } catch (IllegalAccessException e) {
-	                e.printStackTrace();
-	            } catch (InvocationTargetException e) {
-	                e.printStackTrace();
-	            } catch (InstantiationException e) {
-	                e.printStackTrace();
-	            }
 			}
 			if(clicked.equals(cancel))
 			{
@@ -536,41 +597,21 @@ public class InventoryManager implements Listener {
 			}
 			if(clicked.equals(icon))
 			{
-				AnvilGUI gui = new AnvilGUI(p, new AnvilGUI.AnvilClickEventHandler() {
-	                @Override
-	                public void onAnvilClick(AnvilGUI.AnvilClickEvent event) {
-	                    if (event.getSlot() == AnvilGUI.AnvilSlot.OUTPUT) {
-	                        event.setWillClose(true);
-	                        event.setWillDestroy(true);
-	                        advicon = event.getName();
-	                        p.sendMessage(event.getName()); //event.getName() == string in anvil
-	                        Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
-	                			@Override
-	                			public void run() {
-	                				p.openInventory(additionalchallenge);
-	                			}
-	                        }, 5L);
-	                    } else {
-	                        event.setWillClose(false);
-	                        event.setWillDestroy(false);
-	                    }
+				AnvilGUI gui = new AnvilGUI(Main.instance, p, "Ex: minecraft:book", (player, reply) -> {
+					if(reply != null)
+					{
+						advicon = reply;
+						p.sendMessage(reply);
+						Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+							@Override
+							public void run() {
+								p.openInventory(additionalchallenge);
+							}
+						}, 5L);
+						return null;
 	                }
+					return "You must enter a string.";
 	            });
-				ItemStack item = new ItemStack(Material.PAPER);
-				ItemMeta itemmeta = item.getItemMeta();
-				itemmeta.setDisplayName("Example: minecraft:book");
-				item.setItemMeta(itemmeta);
-	            gui.setSlot(AnvilGUI.AnvilSlot.INPUT_LEFT, item);
-
-	            try {
-	                gui.open();
-	            } catch (IllegalAccessException e) {
-	                e.printStackTrace();
-	            } catch (InvocationTargetException e) {
-	                e.printStackTrace();
-	            } catch (InstantiationException e) {
-	                e.printStackTrace();
-	            }
 			}
 			if(clicked.equals(parent))
 			{
@@ -799,11 +840,11 @@ public class InventoryManager implements Listener {
 			descriptionmeta.setDisplayName(ChatColor.GREEN + "Set a description");
 			descriptionmeta.setLore(Arrays.asList(ChatColor.WHITE + "Add a description to your advancement."));
 			description.setItemMeta(descriptionmeta);
-			/*ItemStack counter = new ItemStack(Material.BOOK_AND_QUILL);
-			ItemMeta countermeta = counter.getItemMeta();
-			countermeta.setDisplayName(ChatColor.GREEN + "Set a counter");
-			countermeta.setLore(Arrays.asList(ChatColor.RED + "NOTE: You MUST input a number!", ChatColor.WHITE + "Add a counter to your advancement."));
-			counter.setItemMeta(countermeta);*/
+			//ItemStack counter = new ItemStack(Material.BOOK_AND_QUILL);
+			//ItemMeta countermeta = counter.getItemMeta();
+			//countermeta.setDisplayName(ChatColor.GREEN + "Set a counter");
+			//countermeta.setLore(Arrays.asList(ChatColor.RED + "NOTE: You MUST input a number!", ChatColor.WHITE + "Add a counter to your advancement."));
+			//counter.setItemMeta(countermeta);
 			ItemStack cancel = new ItemStack(Material.BARRIER);
 			ItemMeta cancelmeta = cancel.getItemMeta();
 			cancelmeta.setDisplayName(ChatColor.RED + "Cancel");
@@ -1014,44 +1055,6 @@ public class InventoryManager implements Listener {
 	                e.printStackTrace();
 	            }
 			}
-			/*if(clicked.equals(counter))
-			{
-				AnvilGUI gui = new AnvilGUI(p, new AnvilGUI.AnvilClickEventHandler() {
-	                @Override
-	                public void onAnvilClick(AnvilGUI.AnvilClickEvent event) {
-	                    if (event.getSlot() == AnvilGUI.AnvilSlot.OUTPUT) {
-	                        event.setWillClose(true);
-	                        event.setWillDestroy(true);
-	                        advcounter = Integer.valueOf(event.getName());
-	                        p.sendMessage(event.getName()); //event.getName() == string in anvil
-	                        Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
-	                			@Override
-	                			public void run() {
-	                				p.openInventory(additionalgoal);
-	                			}
-	                        }, 5L);
-	                    } else {
-	                        event.setWillClose(false);
-	                        event.setWillDestroy(false);
-	                    }
-	                }
-	            });
-				ItemStack item = new ItemStack(Material.PAPER);
-				ItemMeta itemmeta = item.getItemMeta();
-				itemmeta.setDisplayName("Example: 10");
-				item.setItemMeta(itemmeta);
-	            gui.setSlot(AnvilGUI.AnvilSlot.INPUT_LEFT, item);
-
-	            try {
-	                gui.open();
-	            } catch (IllegalAccessException e) {
-	                e.printStackTrace();
-	            } catch (InvocationTargetException e) {
-	                e.printStackTrace();
-	            } catch (InstantiationException e) {
-	                e.printStackTrace();
-	            }
-			}*/
 			if(clicked.equals(done))
 			{
 				p.closeInventory();
@@ -1426,7 +1429,7 @@ public class InventoryManager implements Listener {
 	            }
                 
 			}
-		}
+		}*/
 	}
 	@SuppressWarnings("deprecation")
 	public void createAdvancement(Player p, String title, String description, String icon, String trigger, String background, String advancementparent, Boolean parent)
@@ -1453,12 +1456,12 @@ public class InventoryManager implements Listener {
 		}
 		else
 		{
-			AdvancementAPI api = AdvancementAPI.build(Main.instance, title.replaceAll(" ", "_"))
+			AdvancementAPIBuilder api = AdvancementAPI.builder(new NamespacedKey(Main.instance, title.replaceAll(" ", "_")))
 			    .title(title)
 			    .description(description)
 			    .icon(icon)
-			    .trigger(trigger)
-			    .frame(AdvancementAPI.FrameType.TASK)
+			    .trigger(Trigger.builder(TriggerType.valueOf(trigger.trim().toUpperCase()), trigger))
+			    .frame(FrameType.TASK)
 			    .background("minecraft:textures/gui/advancements/backgrounds/" + background);
 			if(parent)
 			{
@@ -1469,32 +1472,42 @@ public class InventoryManager implements Listener {
 					{
 						
 						api.parent("advancementgui:" + advancementparent)
-						.save(w);
-						advname = "";
-						advdescription = "";
-						advicon = "";
-						advbackground = "";
-						advparent = "";
-						advtrigger = "";
-						advcounter = 0;
-						withparent = false;
-						withcounter = false;
-						allworlds = false;
+						.build().save(w);
+						Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+							@Override
+							public void run() {
+								advname = "";
+								advdescription = "";
+								advicon = "";
+								advbackground = "";
+								advparent = "";
+								advtrigger = "";
+								advcounter = 0;
+								withparent = false;
+								withcounter = false;
+								allworlds = false;
+							}
+						}, 20L);
 					}
 					else if(!Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 					{	
 						api.parent("advancementgui:" + advancementparent)
-						.save(p.getWorld());
-						advname = "";
-						advdescription = "";
-						advicon = "";
-						advbackground = "";
-						advparent = "";
-						advtrigger = "";
-						advcounter = 0;
-						withparent = false;
-						withcounter = false;
-						allworlds = false;
+						.build().save(p.getWorld());
+						Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+							@Override
+							public void run() {
+								advname = "";
+								advdescription = "";
+								advicon = "";
+								advbackground = "";
+								advparent = "";
+								advtrigger = "";
+								advcounter = 0;
+								withparent = false;
+								withcounter = false;
+								allworlds = false;
+							}
+						}, 20L);
 					}
 				}
 			}
@@ -1504,38 +1517,49 @@ public class InventoryManager implements Listener {
 				{
 					if(Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 					{
-						api.save(w);
-						advname = "";
-						advdescription = "";
-						advicon = "";
-						advbackground = "";
-						advparent = "";
-						advtrigger = "";
-						advcounter = 0;
-						withparent = false;
-						withcounter = false;
-						allworlds = false;
+						api.build().save(w);
+						Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+							@Override
+							public void run() {
+								advname = "";
+								advdescription = "";
+								advicon = "";
+								advbackground = "";
+								advparent = "";
+								advtrigger = "";
+								advcounter = 0;
+								withparent = false;
+								withcounter = false;
+								allworlds = false;
+							}
+						}, 20L);
 					}
 					else if(!Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 					{
-						api.save(p.getWorld());
-						advname = "";
-						advdescription = "";
-						advicon = "";
-						advbackground = "";
-						advparent = "";
-						advtrigger = "";
-						advcounter = 0;
-						withparent = false;
-						withcounter = false;
-						allworlds = false;
+						api.build().save(p.getWorld());
+						Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+							@Override
+							public void run() {
+								advname = "";
+								advdescription = "";
+								advicon = "";
+								advbackground = "";
+								advparent = "";
+								advtrigger = "";
+								advcounter = 0;
+								withparent = false;
+								withcounter = false;
+								allworlds = false;
+							}
+						}, 20L);
 					}
-					p.sendMessage(ChatColor.GREEN + "Reloading advancements...");
-					Bukkit.getServer().reloadData();
-					p.sendMessage(ChatColor.GREEN + "Done!");
-					api.grant(p);
 				}
 			}
+			p.sendMessage(ChatColor.GREEN + "Reloading advancements...");
+			Bukkit.getServer().reloadData();
+			p.sendMessage(ChatColor.GREEN + "Done!");
+			advancements.add(api.build().getAdvancement());
+			api.build().grant(p);
 		}
 	}
 	@SuppressWarnings("deprecation")
@@ -1563,12 +1587,12 @@ public class InventoryManager implements Listener {
 		}
 		else
 		{
-			AdvancementAPI api = AdvancementAPI.build(Main.instance, title.replaceAll(" ", "_"))
+			AdvancementAPIBuilder api = AdvancementAPI.builder(new NamespacedKey(Main.instance, title.replaceAll(" ", "_")))
 			    .title(title)
 			    .description(description)
 			    .icon(icon)
-			    .trigger(trigger)
-			    .frame(AdvancementAPI.FrameType.GOAL)
+			    .trigger(Trigger.builder(TriggerType.valueOf(trigger.trim().toUpperCase()), trigger))
+			    .frame(FrameType.GOAL)
 			    .background("minecraft:textures/gui/advancements/backgrounds/" + background);
 			if(parent)
 			{
@@ -1577,37 +1601,43 @@ public class InventoryManager implements Listener {
 					if(Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 					{
 						api.parent("advancementgui:" + advancementparent)
-						.save(w);
-						advname = "";
-						advdescription = "";
-						advicon = "";
-						advbackground = "";
-						advparent = "";
-						advtrigger = "";
-						advcounter = 0;
-						withparent = false;
-						withcounter = false;
-						allworlds = false;
+						.build().save(w);
+						Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+							@Override
+							public void run() {
+								advname = "";
+								advdescription = "";
+								advicon = "";
+								advbackground = "";
+								advparent = "";
+								advtrigger = "";
+								advcounter = 0;
+								withparent = false;
+								withcounter = false;
+								allworlds = false;
+							}
+						}, 20L);
 					}
 					else if(!Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 					{
 						api.parent("advancementgui:" + advancementparent)
-						.save(p.getWorld());
-						advname = "";
-						advdescription = "";
-						advicon = "";
-						advbackground = "";
-						advparent = "";
-						advtrigger = "";
-						advcounter = 0;
-						withparent = false;
-						withcounter = false;
-						allworlds = false;
+						.build().save(p.getWorld());
+						Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+							@Override
+							public void run() {
+								advname = "";
+								advdescription = "";
+								advicon = "";
+								advbackground = "";
+								advparent = "";
+								advtrigger = "";
+								advcounter = 0;
+								withparent = false;
+								withcounter = false;
+								allworlds = false;
+							}
+						}, 20L);
 					}
-					p.sendMessage(ChatColor.GREEN + "Reloading advancements...");
-					Bukkit.getServer().reloadData();
-					p.sendMessage(ChatColor.GREEN + "Done!");
-					api.grant(p);
 				}
 			}
 			else if(!parent)
@@ -1616,38 +1646,49 @@ public class InventoryManager implements Listener {
 				{
 					if(Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 					{
-						api.save(w);
-						advname = "";
-						advdescription = "";
-						advicon = "";
-						advbackground = "";
-						advparent = "";
-						advtrigger = "";
-						advcounter = 0;
-						withparent = false;
-						withcounter = false;
-						allworlds = false;
+						api.build().save(w);
+						Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+							@Override
+							public void run() {
+								advname = "";
+								advdescription = "";
+								advicon = "";
+								advbackground = "";
+								advparent = "";
+								advtrigger = "";
+								advcounter = 0;
+								withparent = false;
+								withcounter = false;
+								allworlds = false;
+							}
+						}, 20L);
 					}
 					else if(!Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 					{
-						api.save(p.getWorld());
-						advname = "";
-						advdescription = "";
-						advicon = "";
-						advbackground = "";
-						advparent = "";
-						advtrigger = "";
-						advcounter = 0;
-						withparent = false;
-						withcounter = false;
-						allworlds = false;
+						api.build().save(p.getWorld());
+						Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+							@Override
+							public void run() {
+								advname = "";
+								advdescription = "";
+								advicon = "";
+								advbackground = "";
+								advparent = "";
+								advtrigger = "";
+								advcounter = 0;
+								withparent = false;
+								withcounter = false;
+								allworlds = false;
+							}
+						}, 20L);
 					}
-					p.sendMessage(ChatColor.GREEN + "Reloading advancements...");
-					Bukkit.getServer().reloadData();
-					p.sendMessage(ChatColor.GREEN + "Done!");
-					api.grant(p);
 				}
 			}
+			p.sendMessage(ChatColor.GREEN + "Reloading advancements...");
+			Bukkit.getServer().reloadData();
+			p.sendMessage(ChatColor.GREEN + "Done!");
+			advancements.add(api.build().getAdvancement());
+			api.build().grant(p);
 		}
 	}
 	@SuppressWarnings("deprecation")
@@ -1675,12 +1716,12 @@ public class InventoryManager implements Listener {
 		}
 		else
 		{
-			AdvancementAPI api = AdvancementAPI.build(Main.instance, title.replaceAll(" ", "_"))
+			AdvancementAPIBuilder api = AdvancementAPI.builder(new NamespacedKey(Main.instance, title.replaceAll(" ", "_")))
 			    .title(title)
 			    .description(description)
 			    .icon(icon)
-			    .trigger(trigger)
-			    .frame(AdvancementAPI.FrameType.GOAL)
+			    .trigger(Trigger.builder(TriggerType.valueOf(trigger.trim().toUpperCase()), trigger))
+			    .frame(FrameType.CHALLENGE)
 			    .background("minecraft:textures/gui/advancements/backgrounds/" + background);
 			if(parent)
 			{
@@ -1692,71 +1733,87 @@ public class InventoryManager implements Listener {
 						if(Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 						{
 							api.counter(counter)
-							.save(w);
-							advname = "";
-							advdescription = "";
-							advicon = "";
-							advbackground = "";
-							advparent = "";
-							advtrigger = "";
-							advcounter = 0;
-							withparent = false;
-							withcounter = false;
-							allworlds = false;
+							.build().save(w);
+							Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+								@Override
+								public void run() {
+									advname = "";
+									advdescription = "";
+									advicon = "";
+									advbackground = "";
+									advparent = "";
+									advtrigger = "";
+									advcounter = 0;
+									withparent = false;
+									withcounter = false;
+									allworlds = false;
+								}
+							}, 20L);
 						}
 						else if(!Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 						{
 							api.counter(counter)
-							.save(p.getWorld());
-							advname = "";
-							advdescription = "";
-							advicon = "";
-							advbackground = "";
-							advparent = "";
-							advtrigger = "";
-							advcounter = 0;
-							withparent = false;
-							withcounter = false;
-							allworlds = false;
+							.build().save(p.getWorld());
+							Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+								@Override
+								public void run() {
+									advname = "";
+									advdescription = "";
+									advicon = "";
+									advbackground = "";
+									advparent = "";
+									advtrigger = "";
+									advcounter = 0;
+									withparent = false;
+									withcounter = false;
+									allworlds = false;
+								}
+							}, 20L);
 						}
 					}
 					else if(!wcounter)
 					{
 						if(Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 						{
-							api.counter(counter)
-							.save(w);
-							advname = "";
-							advdescription = "";
-							advicon = "";
-							advbackground = "";
-							advparent = "";
-							advtrigger = "";
-							advcounter = 0;
-							withparent = false;
-							withcounter = false;
-							allworlds = false;
+							api
+							.build().save(w);
+							Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+								@Override
+								public void run() {
+									advname = "";
+									advdescription = "";
+									advicon = "";
+									advbackground = "";
+									advparent = "";
+									advtrigger = "";
+									advcounter = 0;
+									withparent = false;
+									withcounter = false;
+									allworlds = false;
+								}
+							}, 20L);
 						}
 						else if(!Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 						{
-							api.counter(counter)
-							.save(p.getWorld());
-							advname = "";
-							advdescription = "";
-							advicon = "";
-							advbackground = "";
-							advparent = "";
-							advtrigger = "";
-							advcounter = 0;
-							withparent = false;
-							withcounter = false;
-							allworlds = false;
+							api
+							.build().save(p.getWorld());
+							Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+								@Override
+								public void run() {
+									advname = "";
+									advdescription = "";
+									advicon = "";
+									advbackground = "";
+									advparent = "";
+									advtrigger = "";
+									advcounter = 0;
+									withparent = false;
+									withcounter = false;
+									allworlds = false;
+								}
+							}, 20L);
 						}
 					}
-					p.sendMessage(ChatColor.GREEN + "Reloading advancements...");
-					Bukkit.getServer().reloadData();
-					p.sendMessage(ChatColor.GREEN + "Done!");
-					api.grant(p);
 				}
 			}
 			else if(!parent)
@@ -1768,32 +1825,42 @@ public class InventoryManager implements Listener {
 						if(Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 						{
 							api.counter(counter)
-							.save(w);
-							advname = "";
-							advdescription = "";
-							advicon = "";
-							advbackground = "";
-							advparent = "";
-							advtrigger = "";
-							advcounter = 0;
-							withparent = false;
-							withcounter = false;
-							allworlds = false;
+							.build().save(w);
+							Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+								@Override
+								public void run() {
+									advname = "";
+									advdescription = "";
+									advicon = "";
+									advbackground = "";
+									advparent = "";
+									advtrigger = "";
+									advcounter = 0;
+									withparent = false;
+									withcounter = false;
+									allworlds = false;
+								}
+							}, 20L);
 						}
 						else if(!Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 						{
 							api.counter(counter)
-							.save(p.getWorld());
-							advname = "";
-							advdescription = "";
-							advicon = "";
-							advbackground = "";
-							advparent = "";
-							advtrigger = "";
-							advcounter = 0;
-							withparent = false;
-							withcounter = false;
-							allworlds = false;
+							.build().save(p.getWorld());
+							Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+								@Override
+								public void run() {
+									advname = "";
+									advdescription = "";
+									advicon = "";
+									advbackground = "";
+									advparent = "";
+									advtrigger = "";
+									advcounter = 0;
+									withparent = false;
+									withcounter = false;
+									allworlds = false;
+								}
+							}, 20L);
 						}
 					}
 					else if(!wcounter)
@@ -1801,50 +1868,66 @@ public class InventoryManager implements Listener {
 						if(Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 						{
 							api
-							.save(w);
-							advname = "";
-							advdescription = "";
-							advicon = "";
-							advbackground = "";
-							advparent = "";
-							advtrigger = "";
-							advcounter = 0;
-							withparent = false;
-							withcounter = false;
-							allworlds = false;
+							.build().save(w);
+							Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+								@Override
+								public void run() {
+									advname = "";
+									advdescription = "";
+									advicon = "";
+									advbackground = "";
+									advparent = "";
+									advtrigger = "";
+									advcounter = 0;
+									withparent = false;
+									withcounter = false;
+									allworlds = false;
+								}
+							}, 20L);
 						}
 						else if(!Main.instance.getConfig().getBoolean("Server.Worlds.Add_To_All_Worlds"))
 						{
 							api
-							.save(p.getWorld());
-							advname = "";
-							advdescription = "";
-							advicon = "";
-							advbackground = "";
-							advparent = "";
-							advtrigger = "";
-							advcounter = 0;
-							withparent = false;
-							withcounter = false;
-							allworlds = false;
+							.build().save(p.getWorld());
+							Bukkit.getScheduler().scheduleSyncDelayedTask(Main.instance, new Runnable() {
+								@Override
+								public void run() {
+									advname = "";
+									advdescription = "";
+									advicon = "";
+									advbackground = "";
+									advparent = "";
+									advtrigger = "";
+									advcounter = 0;
+									withparent = false;
+									withcounter = false;
+									allworlds = false;
+								}
+							}, 20L);
 						}
 					}
-					p.sendMessage(ChatColor.GREEN + "Reloading advancements...");
-					Bukkit.getServer().reloadData();
-					p.sendMessage(ChatColor.GREEN + "Done!");
-					api.grant(p);
 				}
 			}
+			p.sendMessage(ChatColor.GREEN + "Reloading advancements...");
+			Bukkit.getServer().reloadData();
+			p.sendMessage(ChatColor.GREEN + "Done!");
+			api.build().grant(p);
+			advancements.add(api.build().getAdvancement());
 		}
 	}
 	public static void counterUp(String advancementname, Player p)
 	{
-		AdvancementAPI api = AdvancementAPI.build(Main.instance, advancementname);
-		api.counterUp(p);
+		AdvancementAPIBuilder api = AdvancementAPI.builder(new NamespacedKey(Main.instance, advancementname));
+		api.build().counterUp(p);
 	}
 	public static void counterDown(String advancementname, Player p)
 	{
-		AdvancementAPI api = AdvancementAPI.build(Main.instance, advancementname);
-		api.counterDown(p);
+		AdvancementAPIBuilder api = AdvancementAPI.builder(new NamespacedKey(Main.instance, advancementname));
+		api.build().counterDown(p);
+	}
+	public static void setCounter(String advancementname, int amount, Player p)
+	{
+		AdvancementAPIBuilder api = AdvancementAPI.builder(new NamespacedKey(Main.instance, advancementname));
+		api.counter(amount);
 	}
 }

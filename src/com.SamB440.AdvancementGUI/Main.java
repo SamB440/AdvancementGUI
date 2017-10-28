@@ -4,13 +4,10 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.advancement.Advancement;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
@@ -21,6 +18,11 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class Main extends JavaPlugin implements Listener {
 	/*
@@ -161,11 +163,15 @@ public class Main extends JavaPlugin implements Listener {
 		Player p = (Player)sender;
 		if(args.length == 0)
 		{
+			for (int i = 0; i < 3; i++) {
+				   p.sendMessage(" ");
+				}
 			/*
 			 * TextComponent is used to show text on hover
 			 */
-			TextComponent help = new TextComponent(ChatColor.YELLOW + "Showing help for AdvancementGUI " + ChatColor.WHITE + "1/1");
-			help.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(ChatColor.WHITE + "Showing page 1/1, click to go to the next page.").create()));
+			TextComponent help = new TextComponent(ChatColor.YELLOW + "Showing help for AdvancementGUI " + ChatColor.WHITE + "1/2");
+			help.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(ChatColor.WHITE + "Showing page 1/2, click to go to the next page or use /agui 2.").create()));
+			help.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/agui 2"));
 			p.spigot().sendMessage(help);
 			p.sendMessage(ChatColor.GREEN + "/AdvancementGUI");
 			p.sendMessage(ChatColor.WHITE + "   Aliases: /agui, /ag, /advgui.");
@@ -173,6 +179,10 @@ public class Main extends JavaPlugin implements Listener {
 			p.sendMessage(ChatColor.GREEN + "/AdvancementGUI create");
 			p.sendMessage(ChatColor.WHITE + "   Aliases: None.");
 			p.sendMessage(ChatColor.WHITE + "   Description: Create a new advancement.");
+			p.sendMessage(ChatColor.WHITE + "   Permission(s): AdvancementGUI.create");
+			p.sendMessage(ChatColor.RED + "DEBUG ONLY" + ChatColor.GREEN + " /AdvancementGUI flush");
+			p.sendMessage(ChatColor.WHITE + "   Aliases: None.");
+			p.sendMessage(ChatColor.WHITE + "   Description: Use this to flush the plugin information.");
 			p.sendMessage(ChatColor.WHITE + "   Permission(s): AdvancementGUI.create");
 			/*p.sendMessage(ChatColor.GREEN + "/AdvancementGUI counterup (advancementname)");
 			p.sendMessage(ChatColor.WHITE + "   Aliases: None.");
@@ -186,30 +196,59 @@ public class Main extends JavaPlugin implements Listener {
 			p.sendMessage(ChatColor.WHITE + "   Aliases: None.");
 			p.sendMessage(ChatColor.WHITE + "   Description: Lists recently created advancements.");
 			p.sendMessage(ChatColor.WHITE + "   Permission(s): AdvancementGUI.list");
-			p.sendMessage(ChatColor.GREEN + "/AdvancementGUI counterup (advancement) (player)");
-			p.sendMessage(ChatColor.WHITE + "   Aliases: None.");
-			p.sendMessage(ChatColor.WHITE + "   Description: Increase an advancements count.");
-			p.sendMessage(ChatColor.WHITE + "   Permission(s): AdvancementGUI.count");
-			p.sendMessage(ChatColor.GREEN + "/AdvancementGUI counterdown (advancement) (player)");
-			p.sendMessage(ChatColor.WHITE + "   Aliases: None.");
-			p.sendMessage(ChatColor.WHITE + "   Description: Decrease an advancements count.");
-			p.sendMessage(ChatColor.WHITE + "   Permission(s): AdvancementGUI.count");
 			p.sendMessage(ChatColor.YELLOW + "© 2017 IslandEarth. Made with" + " ❤ " + "by SamB440.");
 		}
 		if(args.length == 1)
 		{
+			if(args[0].equalsIgnoreCase("2"))
+			{
+				for (int i = 0; i < 6; i++) {
+				   p.sendMessage(" ");
+				}
+				TextComponent help = new TextComponent(ChatColor.YELLOW + "Showing help for AdvancementGUI " + ChatColor.WHITE + "2/2");
+				help.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(ChatColor.WHITE + "Showing page 2/2, click to go to the previous page or use /agui.").create()));
+				help.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/agui"));
+				p.spigot().sendMessage(help);
+				p.sendMessage(ChatColor.GREEN + "/AdvancementGUI setcounter (advancement) (amount) (player)");
+				p.sendMessage(ChatColor.WHITE + "   Aliases: None.");
+				p.sendMessage(ChatColor.WHITE + "   Description: Set an advancements count.");
+				p.sendMessage(ChatColor.WHITE + "   Permission(s): AdvancementGUI.count");
+				p.sendMessage(ChatColor.GREEN + " /AdvancementGUI counterup (advancement) (player)");
+				p.sendMessage(ChatColor.WHITE + "   Aliases: None.");
+				p.sendMessage(ChatColor.WHITE + "   Description: Increase an advancements count.");
+				p.sendMessage(ChatColor.WHITE + "   Permission(s): AdvancementGUI.count");
+				p.sendMessage(ChatColor.GREEN + " /AdvancementGUI counterdown (advancement) (player)");
+				p.sendMessage(ChatColor.WHITE + "   Aliases: None.");
+				p.sendMessage(ChatColor.WHITE + "   Description: Decrease an advancements count.");
+				p.sendMessage(ChatColor.WHITE + "   Permission(s): AdvancementGUI.count");
+				p.sendMessage(ChatColor.YELLOW + "© 2017 IslandEarth. Made with" + " ❤ " + "by SamB440.");
+			}
 			if(args[0].equalsIgnoreCase("edit") && p.hasPermission("AdvancementGUI.edit"))
 			{
 				p.sendMessage(ChatColor.RED + "This is coming soon!");
+			}
+			if(args[0].equalsIgnoreCase("flush") && p.hasPermission("AdvancementGUI.create"))
+			{
+				InventoryManager.advname = "";
+				InventoryManager.advdescription = "";
+				InventoryManager.advicon = "";
+				InventoryManager.advbackground = "";
+				InventoryManager.advparent = "";
+				InventoryManager.advtrigger = "";
+				InventoryManager.advcounter = 0;
+				InventoryManager.withparent = false;
+				InventoryManager.withcounter = false;
+				InventoryManager.allworlds = false;
+				p.sendMessage(ChatColor.GREEN + "Plugin information has been flushed.");
 			}
 			if(args[0].equalsIgnoreCase("list") && p.hasPermission("AdvancementGUI.list"))
 			{
 				TextComponent help = new TextComponent(ChatColor.YELLOW + "Showing recent list of advancements for AdvancementGUI " + ChatColor.WHITE + "1/1");
 				help.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(ChatColor.WHITE + "Showing page 1/1, click to go to the next page.").create()));
 				p.spigot().sendMessage(help);
-				for(AdvancementAPI list : AdvancementAPI.getAdvancements())
+				for(Advancement list : InventoryManager.advancements)
 				{
-					p.sendMessage(ChatColor.GREEN + list.getTitle());
+					p.sendMessage(ChatColor.GREEN + "" + list.getKey());
 				}
 			}
 			if(args[0].equalsIgnoreCase("create") && p.hasPermission("AdvancementGUI.create"))
@@ -242,11 +281,11 @@ public class Main extends JavaPlugin implements Listener {
 			{
 				p.sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Server.Messages.No_Permission")));
 			}
-			else if(!args[0].equalsIgnoreCase("create") && !args[0].equalsIgnoreCase("list") && args[0].equalsIgnoreCase("counterup") || args[0].equalsIgnoreCase("counterdown"))
+			else if(!args[0].equalsIgnoreCase("create") && !args[0].equalsIgnoreCase("list") && args[0].equalsIgnoreCase("counterup") || args[0].equalsIgnoreCase("counterdown") || args[0].equalsIgnoreCase("setcounter"))
 			{
 				p.sendMessage(ChatColor.RED + "Invalid arguments. Please provide an advancement and player.");
 			}
-			else if(!args[0].equalsIgnoreCase("create") && !args[0].equalsIgnoreCase("list"))
+			else if(!args[0].equalsIgnoreCase("create") && !args[0].equalsIgnoreCase("list") && !args[0].equalsIgnoreCase("2") && !args[0].equalsIgnoreCase("flush"))
 			{
 				p.sendMessage(ChatColor.RED + "That sub-command could not be found. Type /agui for help.");
 			}
@@ -256,7 +295,6 @@ public class Main extends JavaPlugin implements Listener {
 			if(args[0].equalsIgnoreCase("counterup") && p.hasPermission("AdvancementGUI.count"))
 			{
 				InventoryManager.counterUp(args[1], Bukkit.getPlayer(args[2]));
-				p.sendMessage("");
 			}
 			else if(args[0].equalsIgnoreCase("counterdown") && p.hasPermission("AdvancementGUI.count"))
 			{
@@ -267,6 +305,21 @@ public class Main extends JavaPlugin implements Listener {
 				p.sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Server.Messages.No_Permission")));
 			}
 			else if(!args[0].equalsIgnoreCase("counterup") && !args[0].equalsIgnoreCase("counterdown"))
+			{
+				p.sendMessage(ChatColor.RED + "That sub-command could not be found. Type /agui for help.");
+			}
+		}
+		else if(args.length == 4)
+		{
+			if(args[0].equalsIgnoreCase("setcounter") && p.hasPermission("AdvancementGUI.count"))
+			{
+				InventoryManager.setCounter(args[1], Integer.valueOf(args[2]), Bukkit.getPlayer(args[3]));
+			}
+			else if(args[0].equalsIgnoreCase("setcounter") && !p.hasPermission("AdvancementGUI.count"))
+			{
+				p.sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Server.Messages.No_Permission")));
+			}
+			else if(!args[0].equalsIgnoreCase("setcounter"))
 			{
 				p.sendMessage(ChatColor.RED + "That sub-command could not be found. Type /agui for help.");
 			}

@@ -1,244 +1,206 @@
 package com.SamB440.AdvancementGUI;
 
-import com.SamB440.AdvancementGUI.Main;
-import com.SamB440.AdvancementGUI.NMSManager;
+import java.util.function.BiFunction;
+
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.Plugin;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
+import com.SamB440.AdvancementGUI.version.Version;
+import com.SamB440.AdvancementGUI.version.VersionWrapper;
 
 /**
-* Created by chasechocolate.
-* Small changes by SamB440.
-*/
+ * An anvil gui, used for gathering a user's input
+ * @author Wesley Smith
+ * @since 1.0
+ */
 public class AnvilGUI {
-    private Player player;
-	@SuppressWarnings("unused")
-	private AnvilClickEventHandler handler;
-    private static Class<?> BlockPosition;
-    private static Class<?> PacketPlayOutOpenWindow;
-    private static Class<?> ContainerAnvil;
-    private static Class<?> ChatMessage;
-    private static Class<?> EntityHuman;
-    private HashMap<AnvilSlot, ItemStack> items = new HashMap<AnvilSlot, ItemStack>();
-    private Inventory inv;
-    private Listener listener;
 
-    private void loadClasses() {
-        BlockPosition = NMSManager.get().getNMSClass("BlockPosition");
-        PacketPlayOutOpenWindow = NMSManager.get().getNMSClass("PacketPlayOutOpenWindow");
-        ContainerAnvil = NMSManager.get().getNMSClass("ContainerAnvil");
-        EntityHuman = NMSManager.get().getNMSClass("EntityHuman");
-        ChatMessage = NMSManager.get().getNMSClass("ChatMessage");
+    /**
+     * The player who has the GUI open
+     */
+    private final Player holder;
+    /**
+     * The ItemStack that is in the {@link Slot#INPUT_LEFT} slot.
+     */
+    private final ItemStack insert;
+    /**
+     * Called when the player clicks the {@link Slot#OUTPUT} slot
+     */
+    private final BiFunction<Player, String, String> biFunction;
+
+    /**
+     * The {@link VersionWrapper} for this server
+     */
+    private final VersionWrapper wrapper;
+    /**
+     * The container id of the inventory, used for NMS methods
+     */
+    private final int containerId;
+    /**
+     * The inventory that is used on the Bukkit side of things
+     */
+    private final Inventory inventory;
+    /**
+     * The listener holder class
+     */
+    private final ListenUp listener = new ListenUp();
+
+    /**
+     * Represents the state of the inventory being open
+     */
+    private boolean open = false;
+
+    /**
+     * Create an AnvilGUI and open it for the player
+     * @param plugin A {@link org.bukkit.plugin.java.JavaPlugin} instance
+     * @param holder The {@link Player} to open the inventory for
+     * @param insert What to have the text already set to
+     * @param clickHandler A {@link ClickHandler} that is called when the player clicks the {@link Slot#OUTPUT} slot
+     * @throws NullPointerException If the server version isn't supported
+     *
+     * @deprecated As of version 1.1, use {@link AnvilGUI(Plugin, Player, String, BiFunction)}
+     */
+    @Deprecated
+    public AnvilGUI(Plugin plugin, Player holder, String insert, ClickHandler clickHandler) {
+        this(plugin, holder, insert, clickHandler::onClick);
     }
 
-    public AnvilGUI(final Player player, final AnvilClickEventHandler handler) {
-        loadClasses();
-        this.player = player;
-        this.handler = handler;
+    /**
+     * Create an AnvilGUI and open it for the player.
+     * @param plugin A {@link org.bukkit.plugin.java.JavaPlugin} instance
+     * @param holder The {@link Player} to open the inventory for
+     * @param insert What to have the text already set to
+     * @param biFunction A {@link BiFunction} that is called when the player clicks the {@link Slot#OUTPUT} slot
+     * @throws NullPointerException If the server version isn't supported
+     */
+    public AnvilGUI(Plugin plugin, Player holder, String insert, BiFunction<Player, String, String> biFunction) {
+        this.holder = holder;
+        this.biFunction = biFunction;
 
-        this.listener = new Listener() {
-            @EventHandler
-            public void onInventoryClick(InventoryClickEvent event) {
-                if (event.getWhoClicked() instanceof Player) {
+        final ItemStack paper = new ItemStack(Material.PAPER);
+        final ItemMeta paperMeta = paper.getItemMeta();
+        paperMeta.setDisplayName(insert);
+        paper.setItemMeta(paperMeta);
+        this.insert = paper;
 
-                    if (event.getInventory().equals(inv)) {
-                        event.setCancelled(true);
+        final Version version = Version.of(Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3]);
+        Validate.notNull(version, "Your server version isn't supported in AnvilGUI!");
+        wrapper = version.getWrapper();
 
-                        ItemStack item = event.getCurrentItem();
-                        int slot = event.getRawSlot();
-                        String name = "";
+        wrapper.handleInventoryCloseEvent(holder);
+        wrapper.setActiveContainerDefault(holder);
 
-                        if (item != null) {
-                            if (item.hasItemMeta()) {
-                                ItemMeta meta = item.getItemMeta();
+        Bukkit.getPluginManager().registerEvents(listener, plugin);
 
-                                if (meta.hasDisplayName()) {
-                                    name = meta.getDisplayName();
-                                }
-                            }
-                        }
+        final Object container = wrapper.newContainerAnvil(holder);
 
-                        AnvilClickEvent clickEvent = new AnvilClickEvent(AnvilSlot.bySlot(slot), name);
+        inventory = wrapper.toBukkitInventory(container);
+        inventory.setItem(Slot.INPUT_LEFT, this.insert);
 
-                        handler.onAnvilClick(clickEvent);
+        containerId = wrapper.getNextContainerId(holder);
+        wrapper.sendPacketOpenWindow(holder, containerId);
+        wrapper.setActiveContainer(holder, container);
+        wrapper.setActiveContainerId(container, containerId);
+        wrapper.addActiveContainerSlotListener(container, holder);
 
-                        if (clickEvent.getWillClose()) {
-                            event.getWhoClicked().closeInventory();
-                        }
-
-                        if (clickEvent.getWillDestroy()) {
-                            destroy();
-                        }
-                    }
-                }
-            }
-
-            @EventHandler
-            public void onInventoryClose(InventoryCloseEvent event) {
-                if (event.getPlayer() instanceof Player) {
-                    Inventory inv = event.getInventory();
-                    player.setLevel(player.getLevel() - 1);
-                    if (inv.equals(AnvilGUI.this.inv)) {
-                        inv.clear();
-                        destroy();
-                    }
-                }
-            }
-
-            @EventHandler
-            public void onPlayerQuit(PlayerQuitEvent event) {
-                if (event.getPlayer().equals(getPlayer())) {
-                    player.setLevel(player.getLevel() - 1);
-                    destroy();
-                }
-            }
-        };
-
-        Bukkit.getPluginManager().registerEvents(listener, Main.instance); //Replace with instance of main class
+        open = true;
     }
 
-    public Player getPlayer() {
-        return player;
-    }
+    /**
+     * Closes the inventory if it's open.
+     * @throws IllegalArgumentException If the inventory isn't open
+     */
+    public void closeInventory() {
+        Validate.isTrue(open, "You can't close an inventory that isn't open!");
+        open = false;
 
-    public void setSlot(AnvilSlot slot, ItemStack item) {
-        items.put(slot, item);
-    }
-
-    public void open() throws IllegalAccessException, InvocationTargetException, InstantiationException {
-        player.setLevel(player.getLevel() + 1);
-
-        try {
-            Object p = NMSManager.get().getHandle(player);
-
-
-            Object container = ContainerAnvil.getConstructor(NMSManager.get().getNMSClass("PlayerInventory"), NMSManager.get().getNMSClass("World"), BlockPosition, EntityHuman).newInstance(NMSManager.get().getPlayerField(player, "inventory"), NMSManager.get().getPlayerField(player, "world"), BlockPosition.getConstructor(int.class, int.class, int.class).newInstance(0, 0, 0), p);
-            NMSManager.get().getField(NMSManager.get().getNMSClass("Container"), "checkReachable").set(container, false);
-
-            //Set the items to the items from the inventory given
-            Object bukkitView = NMSManager.get().invokeMethod("getBukkitView", container);
-            inv = (Inventory) NMSManager.get().invokeMethod("getTopInventory", bukkitView);
-
-            for (AnvilSlot slot : items.keySet()) {
-                inv.setItem(slot.getSlot(), items.get(slot));
-            }
-
-            //Counter stuff that the game uses to keep track of inventories
-            int c = (int) NMSManager.get().invokeMethod("nextContainerCounter", p);
-
-            //Send the packet
-            Constructor<?> chatMessageConstructor = ChatMessage.getConstructor(String.class, Object[].class);
-            Object playerConnection = NMSManager.get().getPlayerField(player, "playerConnection");
-            Object packet = PacketPlayOutOpenWindow.getConstructor(int.class, String.class, NMSManager.get().getNMSClass("IChatBaseComponent"), int.class).newInstance(c, "minecraft:anvil", chatMessageConstructor.newInstance("Repairing", new Object[]{}), 0);
-
-            Method sendPacket = NMSManager.get().getMethod("sendPacket", playerConnection.getClass(), PacketPlayOutOpenWindow);
-            sendPacket.invoke(playerConnection, packet);
-
-            //Set their active container to the container
-            Field activeContainerField = NMSManager.get().getField(EntityHuman, "activeContainer");
-            if (activeContainerField != null) {
-                activeContainerField.set(p, container);
-
-                //Set their active container window id to that counter stuff
-                NMSManager.get().getField(NMSManager.get().getNMSClass("Container"), "windowId").set(activeContainerField.get(p), c);
-
-                //Add the slot listener
-                NMSManager.get().getMethod("addSlotListener", activeContainerField.get(p).getClass(), p.getClass()).invoke(activeContainerField.get(p), p);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void destroy() {
-        player = null;
-        handler = null;
-        items = null;
+        wrapper.handleInventoryCloseEvent(holder);
+        wrapper.setActiveContainerDefault(holder);
+        wrapper.sendPacketCloseWindow(holder, containerId);
 
         HandlerList.unregisterAll(listener);
-
-        listener = null;
     }
 
-    public enum AnvilSlot {
-        INPUT_LEFT(0),
-        INPUT_RIGHT(1),
-        OUTPUT(2);
+    /**
+     * Simply holds the listeners for the GUI
+     */
+    private class ListenUp implements Listener {
 
-        private int slot;
-
-        private AnvilSlot(int slot) {
-            this.slot = slot;
-        }
-
-        public static AnvilSlot bySlot(int slot) {
-            for (AnvilSlot anvilSlot : values()) {
-                if (anvilSlot.getSlot() == slot) {
-                    return anvilSlot;
+        @EventHandler
+        public void onInventoryClick(InventoryClickEvent e) {
+            if(e.getInventory().equals(inventory)) {
+                e.setCancelled(true);
+                final Player clicker = (Player) e.getWhoClicked();
+                if(e.getRawSlot() == Slot.OUTPUT) {
+                    final ItemStack clicked = inventory.getItem(e.getRawSlot());
+                    if(clicked == null || clicked.getType() == Material.AIR) return;
+                    final String ret = biFunction.apply(clicker, clicked.hasItemMeta() ? clicked.getItemMeta().getDisplayName() : clicked.getType().toString());
+                    if(ret != null) {
+                        final ItemMeta meta = clicked.getItemMeta();
+                        meta.setDisplayName(ret);
+                        clicked.setItemMeta(meta);
+                        inventory.setItem(e.getRawSlot(), clicked);
+                    } else closeInventory();
                 }
             }
-
-            return null;
         }
 
-        public int getSlot() {
-            return slot;
+        @EventHandler
+        public void onInventoryClose(InventoryCloseEvent e) {
+            if(open && e.getInventory().equals(inventory)) closeInventory();
         }
+
     }
 
-    public interface AnvilClickEventHandler {
-        void onAnvilClick(AnvilClickEvent event);
+    /**
+     * Handles the click of the output slot
+     *
+     * @deprecated Since version 1.1, use {@link AnvilGUI(Plugin, Player, String, BiFunction)} instead
+     */
+    @Deprecated
+    public static abstract class ClickHandler {
+
+        /**
+         * Is called when a {@link Player} clicks on the output in the GUI
+         * @param clicker The {@link Player} who clicked the output
+         * @param input What the item was renamed to
+         * @return What to replace the text with, or null to close the inventory
+         */
+        public abstract String onClick(Player clicker, String input);
+
     }
 
-    public class AnvilClickEvent {
-        private AnvilSlot slot;
+    /**
+     * Class wrapping the magic constants of slot numbers in an anvil GUI
+     */
+    public static class Slot {
 
-        private String name;
+        /**
+         * The slot on the far left, where the first input is inserted. An {@link ItemStack} is always inserted
+         * here to be renamed
+         */
+        public static final int INPUT_LEFT = 0;
+        /**
+         * Not used, but in a real anvil you are able to put the second item you want to combine here
+         */
+        public static final int INPUT_RIGHT = 1;
+        /**
+         * The output slot, where an item is put when two items are combined from {@link #INPUT_LEFT} and
+         * {@link #INPUT_RIGHT} or {@link #INPUT_LEFT} is renamed
+         */
+        public static final int OUTPUT = 2;
 
-        private boolean close = true;
-        private boolean destroy = true;
-
-        public AnvilClickEvent(AnvilSlot slot, String name) {
-            this.slot = slot;
-            this.name = name;
-        }
-
-        public AnvilSlot getSlot() {
-            return slot;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public boolean getWillClose() {
-            return close;
-        }
-
-        public void setWillClose(boolean close) {
-            this.close = close;
-        }
-
-        public boolean getWillDestroy() {
-            return destroy;
-        }
-
-        public void setWillDestroy(boolean destroy) {
-            this.destroy = destroy;
-        }
     }
+
 }
